@@ -1,14 +1,29 @@
 import fs from "fs";
-import mustache from "mustache";
 import * as yaml from "js-yaml";
-import { Config } from "./Config"
+import { Config } from "./Config";
+import { Generator } from "./generators/generator";
+import { Swagger } from "./Swagger";
 
-const config = parseConfig()
-console.log(config)
+const config = readConfig();
+const swagger = readSwagger()
 
-// Parse the yaml config file 
-function parseConfig(): Config{
-    const yamlFileContent = fs.readFileSync("config.yml", "utf-8");
-    const data: Config = yaml.load(yamlFileContent) as Config;
-    return data
+const generator = new Generator(config, swagger)
+generator.generateResource()
+
+// TODO: throw error if config is wrong
+function readConfig(): Config {
+  const yamlFileContent = fs.readFileSync("config.yml", "utf-8");
+  const data: Config = yaml.load(yamlFileContent) as Config;
+  return data;
+}
+
+// TODO: throw error if swagger is wrong?
+function readSwagger() {
+  const jsonFileContent = fs.readFileSync("swagger.json", "utf-8");
+  const jsonData: Swagger = JSON.parse(jsonFileContent) as Swagger;
+  return jsonData
+}
+
+function updateSwagger(){
+    
 }

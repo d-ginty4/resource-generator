@@ -1,0 +1,97 @@
+package outbound_ruleset
+
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	gcloud "terraform-provider-genesyscloud/genesyscloud"
+	resourceExporter "terraform-provider-genesyscloud/genesyscloud/resource_exporter"
+	registrar "terraform-provider-genesyscloud/genesyscloud/resource_register"
+)
+
+/*
+resource_genesyscloud_outbound_ruleset_schema.go holds four functions within it:
+
+1.  The registration code that registers the Datasource, Resource and Exporter for the package.
+2.  The resource schema definitions for the outbound_ruleset resource.
+3.  The datasource schema definitions for the outbound_ruleset datasource.
+4.  The resource exporter configuration for the outbound_ruleset exporter.
+*/
+const resourceName = "genesyscloud_outbound_ruleset"
+
+// SetRegistrar registers all of the resources, datasources and exporters in the package
+func SetRegistrar(regInstance registrar.Registrar) {
+	regInstance.RegisterResource(resourceName, ResourceOutboundRuleset())
+	regInstance.RegisterDataSource(resourceName, DataSourceOutboundRuleset())
+	regInstance.RegisterExporter(resourceName, OutboundRulesetExporter())
+}
+
+// ResourceOutboundRuleset registers the genesyscloud_outbound_ruleset resource with Terraform
+func ResourceOutboundRuleset() *schema.Resource {
+	outboundrulesetdataactionconditionpredicateResource := &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			`output_field`: {
+				Description: `The name of an output field from the data action's output to use for this condition`,
+				Required:    true,
+				Type:        schema.TypeString,
+			},
+			`output_operator`: {
+				Description:  `The operation with which to evaluate this condition`,
+				Required:     true,
+				Type:         schema.TypeString,
+				ValidateFunc: validation.StringInSlice([]string{`EQUALS`, `LESS_THAN`, `LESS_THAN_EQUALS`, `GREATER_THAN`, `GREATER_THAN_EQUALS`, `CONTAINS`, `BEGINS_WITH`, `ENDS_WITH`, `BEFORE`, `AFTER`}, false),
+			},
+			`comparison_value`: {
+				Description: `The value to compare against for this condition`,
+				Required:    true,
+				Type:        schema.TypeString,
+			},
+			`inverted`: {
+				Description: `If true, inverts the result of evaluating this Predicate. Default is false.`,
+				Required:    true,
+				Type:        schema.TypeBool,
+			},
+			`output_field_missing_resolution`: {
+				Description: `The result of this predicate if the requested output field is missing from the data action's result`,
+				Required:    true,
+				Type:        schema.TypeBool,
+			},
+		},
+	}
+
+	return &schema.Resource{
+		Description: `Genesys Cloud outbound ruleset`,
+
+		CreateContext: gcloud.CreateWithPooledClient(createOutboundRuleset),
+		ReadContext:   gcloud.ReadWithPooledClient(readOutboundRuleset),
+		UpdateContext: gcloud.UpdateWithPooledClient(updateOutboundRuleset),
+		DeleteContext: gcloud.DeleteWithPooledClient(deleteOutboundRuleset),
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+		SchemaVersion: 1,
+		Schema: map[string]*schema.Schema{
+			`name`: {
+				Description: `The name of the RuleSet.`,
+				Required:    true,
+				Type:        schema.TypeString,
+			},
+			`contact_list_id`: {
+				Description: `A ContactList to provide user-interface suggestions for contact columns on relevant conditions and actions.`,
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
+			`queue_id`: {
+				Description: `A Queue to provide user-interface suggestions for wrap-up codes on relevant conditions and actions.`,
+				Optional:    true,
+				Type:        schema.TypeString,
+			},
+			`rules`: {
+				Description: `The list of rules.`,
+				Optional:    true,
+				Type:        schema.TypeList,
+				Elem:        outboundrulesetdialerruleResource,
+			},
+		},
+	}
+}
