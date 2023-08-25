@@ -1,4 +1,4 @@
-package outbound_ruleset
+package {{snakeName}}
 
 import (
 	"context"
@@ -11,182 +11,115 @@ import (
 )
 
 /*
-The genesyscloud_outbound_ruleset_proxy.go file contains the proxy structures and methods that interact
+The genesyscloud_{{snakeName}}_proxy.go file contains the proxy structures and methods that interact
 with the Genesys Cloud SDK. We use composition here for each function on the proxy so individual functions can be stubbed
 out during testing.
 */
 
 // internalProxy holds a proxy instance that can be used throughout the package
-var internalProxy *outboundRulesetProxy
+var internalProxy *{{camelName}}Proxy
 
 // Type definitions for each func on our proxy so we can easily mock them out later
-type createOutboundRulesetFunc func(ctx context.Context, p *outboundRulesetProxy, ruleset *platformclientv2.Ruleset) (*platformclientv2.Ruleset, error)
-type getAllOutboundRulesetFunc func(ctx context.Context, p *outboundRulesetProxy) (*[]platformclientv2.Ruleset, error)
-type getOutboundRulesetByIdFunc func(ctx context.Context, p *outboundRulesetProxy, rulesetId string) (ruleset *platformclientv2.Ruleset, responseCode int, err error)
-type getOutboundRulesetIdByNameFunc func(ctx context.Context, p *outboundRulesetProxy, search string) (rulesetId string, retryable bool, err error)
-type updateOutboundRulesetFunc func(ctx context.Context, p *outboundRulesetProxy, rulesetId string, ruleset *platformclientv2.Ruleset) (*platformclientv2.Ruleset, error)
-type deleteOutboundRulesetFunc func(ctx context.Context, p *outboundRulesetProxy, rulesetId string) (responseCode int, err error)
+type create{{pascalName}}Func func(ctx context.Context, p *{{camelName}}Proxy, ruleset *platformclientv2.{{mainObject}}) (*platformclientv2.{{mainObject}}, error)
+type getAll{{pascalName}}Func func(ctx context.Context, p *{{camelName}}Proxy) (*[]platformclientv2.Ruleset, error)
+type get{{pascalName}}ByIdFunc func(ctx context.Context, p *{{camelName}}Proxy, id string) (ruleset *platformclientv2.{{mainObject}}, responseCode int, err error)
+type get{{pascalName}}IdByNameFunc func(ctx context.Context, p *{{camelName}}Proxy, name string) (id string, retryable bool, err error)
+type update{{pascalName}}Func func(ctx context.Context, p *{{camelName}}Proxy, id string, ruleset *platformclientv2.{{mainObject}}) (*platformclientv2.{{mainObject}}, error)
+type delete{{pascalName}}Func func(ctx context.Context, p *{{camelName}}Proxy, id string) (responseCode int, err error)
 
-// outboundRulesetProxy contains all of the methods that call genesys cloud APIs.
-type outboundRulesetProxy struct {
+// {{camelName}}Proxy contains all of the methods that call genesys cloud APIs.
+type {{camelName}}Proxy struct {
 	clientConfig                   *platformclientv2.Configuration
 	outboundApi                    *platformclientv2.OutboundApi
-	createOutboundRulesetAttr      createOutboundRulesetFunc
-	getAllOutboundRulesetAttr      getAllOutboundRulesetFunc
-	getOutboundRulesetByIdAttr     getOutboundRulesetByIdFunc
-	getOutboundRulesetIdByNameAttr getOutboundRulesetIdByNameFunc
-	updateOutboundRulesetAttr      updateOutboundRulesetFunc
-	deleteOutboundRulesetAttr      deleteOutboundRulesetFunc
+	create{{pascalName}}Attr      create{{pascalName}}Func
+	getAll{{pascalName}}Attr      getAll{{pascalName}}Func
+	get{{pascalName}}ByIdAttr     get{{pascalName}}ByIdFunc
+	get{{pascalName}}IdByNameAttr get{{pascalName}}IdByNameFunc
+	update{{pascalName}}Attr      update{{pascalName}}Func
+	delete{{pascalName}}Attr      delete{{pascalName}}Func
 }
 
-// newOutboundRulesetProxy initializes the ruleset proxy with all of the data needed to communicate with Genesys Cloud
-func newOutboundRulesetProxy(clientConfig *platformclientv2.Configuration) *outboundRulesetProxy {
+// new{{pascalName}}Proxy initializes the ruleset proxy with all of the data needed to communicate with Genesys Cloud
+func new{{pascalName}}Proxy(clientConfig *platformclientv2.Configuration) *{{camelName}}Proxy {
 	api := platformclientv2.NewOutboundApiWithConfig(clientConfig)
 	return &outboundRulesetProxy{
 		clientConfig:                   clientConfig,
 		outboundApi:                    api,
-		createOutboundRulesetAttr:      createOutboundRulesetFn,
-		getAllOutboundRulesetAttr:      getAllOutboundRulesetFn,
-		getOutboundRulesetByIdAttr:     getOutboundRulesetByIdFn,
-		getOutboundRulesetIdByNameAttr: getOutboundRulesetIdByNameFn,
-		updateOutboundRulesetAttr:      updateOutboundRulesetFn,
-		deleteOutboundRulesetAttr:      deleteOutboundRulesetFn,
+		create{{pascalName}}Attr:      create{{pascalName}}Fn,
+		getAll{{pascalName}}Attr:      getAll{{pascalName}}Fn,
+		get{{pascalName}}ByIdAttr:     get{{pascalName}}ByIdFn,
+		get{{pascalName}}IdByNameAttr: get{{pascalName}}IdByNameFn,
+		update{{pascalName}}Attr:      update{{pascalName}}Fn,
+		delete{{pascalName}}Attr:      delete{{pascalName}}Fn,
 	}
 }
 
-// getOutboundRulesetProxy acts as a singleton to for the internalProxy.  It also ensures
+// get{{pascalName}}Proxy acts as a singleton to for the internalProxy.  It also ensures
 // that we can still proxy our tests by directly setting internalProxy package variable
-func getOutboundRulesetProxy(clientConfig *platformclientv2.Configuration) *outboundRulesetProxy {
+func get{{pascalName}}Proxy(clientConfig *platformclientv2.Configuration) *{{camelName}}Proxy {
 	if internalProxy == nil {
-		internalProxy = newOutboundRulesetProxy(clientConfig)
+		internalProxy = new{{pascalName}}Proxy(clientConfig)
 	}
 
 	return internalProxy
 }
 
-// createOutboundRuleset creates a Genesys Cloud Outbound Ruleset
-func (p *outboundRulesetProxy) createOutboundRuleset(ctx context.Context, ruleset *platformclientv2.Ruleset) (*platformclientv2.Ruleset, error) {
-	return p.createOutboundRulesetAttr(ctx, p, ruleset)
+// create{{pascalName}} creates a Genesys Cloud {{englishName}}
+func (p *{{camelName}}Proxy) create{{pascalName}}(ctx context.Context, {{camelName}} *platformclientv2.{{mainObject}}) (*platformclientv2.{{mainObject}}, error) {
+	return p.create{{pascalName}}Attr(ctx, p, {{camelName}})
 }
 
-// getOutboundRuleset retrieves all Genesys Cloud Outbound Ruleset
-func (p *outboundRulesetProxy) getAllOutboundRuleset(ctx context.Context) (*[]platformclientv2.Ruleset, error) {
-	return p.getAllOutboundRulesetAttr(ctx, p)
+// get{{pascalName}} retrieves all Genesys Cloud {{englishName}}
+func (p *{{camelName}}Proxy) getAll{{pascalName}}(ctx context.Context) (*[]platformclientv2.{{mainObject}}, error) {
+	return p.getAll{{pascalName}}Attr(ctx, p)
 }
 
-// getOutboundRulesetById returns a single Genesys Cloud Outbound Ruleset by Id
-func (p *outboundRulesetProxy) getOutboundRulesetById(ctx context.Context, rulesetId string) (ruleset *platformclientv2.Ruleset, statusCode int, err error) {
-	return p.getOutboundRulesetByIdAttr(ctx, p, rulesetId)
+// get{{pascalName}}ById returns a single Genesys Cloud {{englishName}} by Id
+func (p *{{camelName}}Proxy) get{{pascalName}}ById(ctx context.Context, id string) ({{camelName}} *platformclientv2.{{mainObject}}, statusCode int, err error) {
+	return p.get{{pascalName}}ByIdAttr(ctx, p, id)
 }
 
-// getOutboundRulesetIdByName returns a single Genesys Cloud Outbound Ruleset by a name
-func (p *outboundRulesetProxy) getOutboundRulesetIdByName(ctx context.Context, name string) (rulesetId string, retryable bool, err error) {
-	return p.getOutboundRulesetIdByNameAttr(ctx, p, name)
+// get{{pascalName}}IdByName returns a single Genesys Cloud {{englishName}} by a name
+func (p *{{camelName}}Proxy) get{{pascalName}}IdByName(ctx context.Context, name string) (id string, retryable bool, err error) {
+	return p.get{{pascalName}}IdByNameAttr(ctx, p, name)
 }
 
-// updateOutboundRuleset updates a Genesys Cloud Outbound Ruleset
-func (p *outboundRulesetProxy) updateOutboundRuleset(ctx context.Context, rulesetId string, ruleset *platformclientv2.Ruleset) (*platformclientv2.Ruleset, error) {
-	return p.updateOutboundRulesetAttr(ctx, p, rulesetId, ruleset)
+// update{{pascalName}} updates a Genesys Cloud {{englishName}}
+func (p *{{camelName}}Proxy) update{{pascalName}}(ctx context.Context, id string, {{camelName}} *platformclientv2.{{mainObject}}) (*platformclientv2.{{mainObject}}, error) {
+	return p.update{{pascalName}}Attr(ctx, p, id, {{camelName}})
 }
 
-// deleteOutboundRuleset deletes a Genesys Cloud Outbound Ruleset by Id
-func (p *outboundRulesetProxy) deleteOutboundRuleset(ctx context.Context, rulesetId string) (statusCode int, err error) {
-	return p.deleteOutboundRulesetAttr(ctx, p, rulesetId)
+// delete{{pascalName}} deletes a Genesys Cloud {{englishName}} by Id
+func (p *{{camelName}}Proxy) delete{{pascalName}}(ctx context.Context, id string) (statusCode int, err error) {
+	return p.delete{{pascalName}}Attr(ctx, p, id)
 }
 
-// createOutboundRulesetFn is an implementation function for creating a Genesys Cloud Outbound Ruleset
-func createOutboundRulesetFn(ctx context.Context, p *outboundRulesetProxy, ruleset *platformclientv2.Ruleset) (*platformclientv2.Ruleset, error) {
-	ruleset, _, err := p.outboundApi.PostOutboundRulesets(*ruleset)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to create ruleset: %s", err)
-	}
-
-	return ruleset, nil
+// create{{pascalName}}Fn is an implementation function for creating a Genesys Cloud {{englishName}}
+func create{{pascalName}}Fn(ctx context.Context, p *{{camelName}}Proxy, {{camelName}} *platformclientv2.{{mainObject}}) (*platformclientv2.{{mainObject}}, error) {
+	
 }
 
-// getAllOutboundRulesetFn is the implementation for retrieving all outbound ruleset in Genesys Cloud
-func getAllOutboundRulesetFn(ctx context.Context, p *outboundRulesetProxy) (*[]platformclientv2.Ruleset, error) {
-	var allRulesets []platformclientv2.Ruleset
-
-	for pageNum := 1; ; pageNum++ {
-		const pageSize = 100
-
-		rulesets, _, err := p.outboundApi.GetOutboundRulesets(pageSize, pageNum, true, "", "", "", "")
-		if err != nil {
-			return nil, fmt.Errorf("Failed to get outbound rulesets: %v", err)
-		}
-
-		if rulesets.Entities == nil || len(*rulesets.Entities) == 0 {
-			break
-		}
-
-		for _, ruleset := range *rulesets.Entities {
-			log.Printf("Dealing with ruleset id : %s", *ruleset.Id)
-			allRulesets = append(allRulesets, ruleset)
-		}
-	}
-
-	return &allRulesets, nil
+// getAll{{pascalName}}Fn is the implementation for retrieving all {{englishName}} in Genesys Cloud
+func getAll{{pascalName}}Fn(ctx context.Context, p *{{camelName}}Proxy) (*[]platformclientv2.{{mainObject}}, error) {
+	
 }
 
-// getOutboundRulesetByIdFn is an implementation of the function to get a Genesys Cloud Outbound Ruleset by Id
-func getOutboundRulesetByIdFn(ctx context.Context, p *outboundRulesetProxy, rulesetId string) (ruleset *platformclientv2.Ruleset, statusCode int, err error) {
-	ruleset, resp, err := p.outboundApi.GetOutboundRuleset(rulesetId)
-	if err != nil {
-		//This is an API that throws an error on a 404 instead of just returning a 404.
-		if strings.Contains(fmt.Sprintf("%s", err), "API Error: 404") {
-			return nil, http.StatusNotFound, nil
-
-		}
-		return nil, 0, fmt.Errorf("Failed to retrieve ruleset by id %s: %s", rulesetId, err)
-	}
-
-	return ruleset, resp.StatusCode, nil
+// get{{pascalName}}ByIdFn is an implementation of the function to get a Genesys Cloud {{englishName}} by Id
+func get{{pascalName}}ByIdFn(ctx context.Context, p *{{camelName}}Proxy, id string) ({{camelName}} *platformclientv2.{{mainObject}}, statusCode int, err error) {
+	
 }
 
-// getOutboundRulesetIdBySearchFn is an implementation of the function to get a Genesys Cloud Outbound Ruleset by name
-func getOutboundRulesetIdByNameFn(ctx context.Context, p *outboundRulesetProxy, name string) (rulesetIdId string, retryable bool, err error) {
-	const pageNum = 1
-	const pageSize = 100
-	rulesets, _, err := p.outboundApi.GetOutboundRulesets(pageSize, pageNum, true, "", name, "", "")
-	if err != nil {
-		return "", false, fmt.Errorf("Error searching outbound ruleset %s: %s", name, err)
-	}
-
-	if rulesets.Entities == nil || len(*rulesets.Entities) == 0 {
-		return "", true, fmt.Errorf("No outbound ruleset found with name %s", name)
-	}
-
-	if len(*rulesets.Entities) > 1 {
-		return "", false, fmt.Errorf("Too many values returned in look for outbound rulesets.  Unable to choose 1 ruleset.  Please refine search and continue.")
-	}
-
-	log.Printf("Retrieved the ruleset id %s by name %s", *(*rulesets.Entities)[0].Id, name)
-	ruleset := (*rulesets.Entities)[0]
-	return *ruleset.Id, false, nil
+// get{{pascalName}}IdBySearchFn is an implementation of the function to get a Genesys Cloud {{englishName}} by name
+func get{{pascalName}}IdByNameFn(ctx context.Context, p *{{camelName}}Proxy, name string) (id string, retryable bool, err error) {
+	
 }
 
-// updateOutboundRulesetFn is an implementation of the function to update a Genesys Cloud Outbound Rulesets
-func updateOutboundRulesetFn(ctx context.Context, p *outboundRulesetProxy, rulesetId string, ruleset *platformclientv2.Ruleset) (*platformclientv2.Ruleset, error) {
-	outboundRuleset, _, err := getOutboundRulesetByIdFn(ctx, p, rulesetId)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to ruleset by id %s: %s", rulesetId, err)
-	}
-
-	ruleset.Version = outboundRuleset.Version
-	ruleset, _, err = p.outboundApi.PutOutboundRuleset(rulesetId, *ruleset)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to update ruleset: %s", err)
-	}
-	return ruleset, nil
+// update{{pascalName}}Fn is an implementation of the function to update a Genesys Cloud {{englishName}}
+func update{{pascalName}}Fn(ctx context.Context, p *{{camelName}}Proxy, id string, {{camelName}} *platformclientv2.{{mainObject}}) (*platformclientv2.{{mainObject}}, error) {
+	
 }
 
-// deleteOutboundRulesetFn is an implementation function for deleting a Genesys Cloud Outbound Rulesets
-func deleteOutboundRulesetFn(ctx context.Context, p *outboundRulesetProxy, rulesetId string) (statusCode int, err error) {
-	resp, err := p.outboundApi.DeleteOutboundRuleset(rulesetId)
-	if err != nil {
-		return resp.StatusCode, fmt.Errorf("Failed to delete ruleset: %s", err)
-	}
-
-	return resp.StatusCode, nil
+// delete{{pascalName}}Fn is an implementation function for deleting a Genesys Cloud {{englishName}}
+func delete{{pascalName}}Fn(ctx context.Context, p *{{camelName}}Proxy, id string) (statusCode int, err error) {
+	
 }

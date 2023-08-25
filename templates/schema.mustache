@@ -1,4 +1,4 @@
-package outbound_ruleset
+package {{resourceName}}
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -10,87 +10,88 @@ import (
 )
 
 /*
-resource_genesyscloud_outbound_ruleset_schema.go holds four functions within it:
+resource_genesycloud_{{resourceName}}_schema.go holds four functions within it:
 
 1.  The registration code that registers the Datasource, Resource and Exporter for the package.
-2.  The resource schema definitions for the outbound_ruleset resource.
-3.  The datasource schema definitions for the outbound_ruleset datasource.
-4.  The resource exporter configuration for the outbound_ruleset exporter.
+2.  The resource schema definitions for the {{resourceName}} resource.
+3.  The datasource schema definitions for the {{resourceName}} datasource.
+4.  The resource exporter configuration for the {{resourceName}} exporter.
 */
-const resourceName = "genesyscloud_outbound_ruleset"
+const resourceName = "genesyscloud_{{resourceName}}"
 
 // SetRegistrar registers all of the resources, datasources and exporters in the package
 func SetRegistrar(regInstance registrar.Registrar) {
-	regInstance.RegisterResource(resourceName, ResourceOutboundRuleset())
-	regInstance.RegisterDataSource(resourceName, DataSourceOutboundRuleset())
-	regInstance.RegisterExporter(resourceName, OutboundRulesetExporter())
+	regInstance.RegisterResource(resourceName, Resource{{funcName}}())
+	regInstance.RegisterDataSource(resourceName, DataSource{{funcName}}())
+	regInstance.RegisterExporter(resourceName, {{funcName}}Exporter())
 }
 
-// ResourceOutboundRuleset registers the genesyscloud_outbound_ruleset resource with Terraform
-func ResourceOutboundRuleset() *schema.Resource {
-	outboundrulesetdataactionconditionpredicateResource := &schema.Resource{
+// Resource{{funcName}} registers the genesyscloud_{{resourceName}} resource with Terraform
+func Resource{{funcName}}() *schema.Resource {
+	{{#nestedObjects}}
+	{{objectName}}Resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			`output_field`: {
-				Description: `The name of an output field from the data action's output to use for this condition`,
-				Required:    true,
-				Type:        schema.TypeString,
+			{{#properties}}
+			"{{name}}": {
+				Description: "{{description}}",{{#required}}
+				Required:    true,{{/required}}{{^required}}
+				Optional:    true,{{/required}}
+				Type:        {{type}},{{#nestedResource}}
+				Elem:        {{nestedResource}}Resource,{{/nestedResource}}
 			},
-			`output_operator`: {
-				Description:  `The operation with which to evaluate this condition`,
-				Required:     true,
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{`EQUALS`, `LESS_THAN`, `LESS_THAN_EQUALS`, `GREATER_THAN`, `GREATER_THAN_EQUALS`, `CONTAINS`, `BEGINS_WITH`, `ENDS_WITH`, `BEFORE`, `AFTER`}, false),
-			},
-			`comparison_value`: {
-				Description: `The value to compare against for this condition`,
-				Required:    true,
-				Type:        schema.TypeString,
-			},
-			`inverted`: {
-				Description: `If true, inverts the result of evaluating this Predicate. Default is false.`,
-				Required:    true,
-				Type:        schema.TypeBool,
-			},
-			`output_field_missing_resolution`: {
-				Description: `The result of this predicate if the requested output field is missing from the data action's result`,
-				Required:    true,
-				Type:        schema.TypeBool,
-			},
+			{{/properties}}
 		},
 	}
 
+	{{/nestedObjects}}
 	return &schema.Resource{
-		Description: `Genesys Cloud outbound ruleset`,
+		Description: `Genesys Cloud {{englishName}}`,
 
-		CreateContext: gcloud.CreateWithPooledClient(createOutboundRuleset),
-		ReadContext:   gcloud.ReadWithPooledClient(readOutboundRuleset),
-		UpdateContext: gcloud.UpdateWithPooledClient(updateOutboundRuleset),
-		DeleteContext: gcloud.DeleteWithPooledClient(deleteOutboundRuleset),
+		CreateContext: gcloud.CreateWithPooledClient({{createFunctionName}}),
+		ReadContext:   gcloud.ReadWithPooledClient({{readFunctionName}}),
+		UpdateContext: gcloud.UpdateWithPooledClient({{updateFunctionName}}),
+		DeleteContext: gcloud.DeleteWithPooledClient({{deleteFunctionName}}),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		SchemaVersion: 1,
 		Schema: map[string]*schema.Schema{
-			`name`: {
-				Description: `The name of the RuleSet.`,
-				Required:    true,
-				Type:        schema.TypeString,
+			{{#properties}}
+			"{{name}}": {
+				Description: "{{description}}",{{#required}}
+				Required:    true,{{/required}}{{^required}}
+				Optional:    true,{{/required}}
+				Type:        {{type}},{{#nestedResource}}
+				Elem:        {{nestedResource}}Resource,{{/nestedResource}}
 			},
-			`contact_list_id`: {
-				Description: `A ContactList to provide user-interface suggestions for contact columns on relevant conditions and actions.`,
-				Optional:    true,
+			{{/properties}}	
+		},
+	}
+}																																																											
+
+// {{funcName}}Exporter returns the resourceExporter object used to hold the genesyscloud_{{resourceName}} exporter's config
+func {{funcName}}Exporter() *resourceExporter.ResourceExporter {
+	return &resourceExporter.ResourceExporter{
+		GetResourcesFunc: gcloud.GetAllWithPooledClient({{exporterGetFunctionName}}),
+		RefAttrs: map[string]*resourceExporter.RefAttrSettings{
+			// TODO: Add any reference attributes here
+		},
+	}
+}
+
+// DataSource{{funcName}} registers the genesyscloud_{{resourceName}} data source
+func DataSource{{funcName}}() *schema.Resource {
+	return &schema.Resource{
+		Description: `Genesys Cloud {{englishName}} data source. Select an {{englishName}} by name`,
+		ReadContext: gcloud.ReadWithPooledClient({{dataSourceReadFunctionName}}),
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Description: `{{englishName}} name`,
 				Type:        schema.TypeString,
-			},
-			`queue_id`: {
-				Description: `A Queue to provide user-interface suggestions for wrap-up codes on relevant conditions and actions.`,
 				Optional:    true,
-				Type:        schema.TypeString,
-			},
-			`rules`: {
-				Description: `The list of rules.`,
-				Optional:    true,
-				Type:        schema.TypeList,
-				Elem:        outboundrulesetdialerruleResource,
 			},
 		},
 	}

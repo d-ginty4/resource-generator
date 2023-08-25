@@ -1,8 +1,9 @@
-import { Config } from "../Config";
-import mustache from "mustache";
+import { Config } from "../types/Config";
 import fs from "fs";
 import { SchemaGenerator } from "./SchemaGenerator";
-import { Swagger } from "../Swagger";
+import { Swagger } from "../types/Swagger";
+import { generateFile } from "../utils/fileOperations";
+import { ProxyGenerator } from "./ProxyGenerator";
 
 export class Generator {
   private config: Config;
@@ -20,7 +21,7 @@ export class Generator {
     this.dataSourceTestTemplate = "templates/dataSourceTest.mustache";
     this.resourceTestTemplate = "templates/resourceTest.mustache";
     this.packageFolder = `output/${this.config.package}`;
-    this.apisTemplate = "templates/docs/apis.mustache"
+    this.apisTemplate = "templates/docs/apis.mustache";
     this.resourceDocTemplate = "templates/docs/resource.mustache";
     this.dataSourceDocTemplate = "templates/docs/dataSource.mustache";
   }
@@ -46,10 +47,14 @@ export class Generator {
 
     // Generate the resource schema
     const schemaGenerator = new SchemaGenerator(
+      this.config,
       this.swagger.definitions[this.config.rootObject],
       this.swagger.definitions
     );
-    schemaGenerator.generate()
+    schemaGenerator.generate();
+
+    const proxyGenerator = new ProxyGenerator(this.config, this.swagger);
+    proxyGenerator.generate();
 
     // Check if the user wants test files made
     if (this.config.testFiles) {
@@ -65,7 +70,7 @@ export class Generator {
   private generateTests() {
     // Generate resource test file
     const resourceTestData = {};
-    this.generateFile(
+    generateFile(
       this.resourceTestTemplate,
       resourceTestData,
       `${this.packageFolder}/resourceTest.go`
@@ -73,7 +78,7 @@ export class Generator {
 
     // Generate data source test file
     const docTestData = {};
-    this.generateFile(
+    generateFile(
       this.dataSourceTestTemplate,
       docTestData,
       `${this.packageFolder}/dataSourceTest.go`
@@ -83,15 +88,11 @@ export class Generator {
   private generateDocs() {
     // Generate apis file
     const APIdata = {};
-    this.generateFile(
-      this.apisTemplate,
-      APIdata,
-      `${this.packageFolder}/apis.md`
-    );
+    generateFile(this.apisTemplate, APIdata, `${this.packageFolder}/apis.md`);
 
     // Generate resource example file
     const resourceDocData = {};
-    this.generateFile(
+    generateFile(
       this.resourceDocTemplate,
       resourceDocData,
       `${this.packageFolder}/resource.tf`
@@ -99,26 +100,10 @@ export class Generator {
 
     // Generate data source example file
     const dataSourceDocData = {};
-    this.generateFile(
+    generateFile(
       this.dataSourceDocTemplate,
       dataSourceDocData,
       `${this.packageFolder}/data-source.tf`
     );
-  }
-
-  /**
-   * Generate a file using a template and data
-   * @param template file template location
-   * @param data the data to be used by the template
-   * @param destination the destination of the output file
-   */
-  private generateFile(template: string, data: object, destination: string) {
-    const templateText = fs.readFileSync(template, "utf-8");
-
-    // generate the resource test file from the template and data
-    const output = mustache.render(templateText, data);
-
-    // Save the generated output to a file
-    fs.writeFileSync(destination, output, "utf-8");
   }
 }

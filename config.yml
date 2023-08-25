@@ -14,7 +14,7 @@ operations:
     method: PUT
     path: /api/v2/outbound/callabletimesets
     link: https://developer.genesys.cloud/devapps/api-explorer#post-api-v2-outbound-callabletimesets
-  - type: destroy
+  - type: delete
     method: DELETE
     path: /api/v2/outbound/callabletimesets/{callableTimeSetId}
     link: https://developer.genesys.cloud/devapps/api-explorer#delete-api-v2-outbound-callabletimesets--callableTimeSetId-
@@ -22,5 +22,5 @@ operations:
     method: GET
     path: /api/v2/outbound/callabletimesets
     link: https://developer.genesys.cloud/devapps/api-explorer#get-api-v2-outbound-callabletimesets
-testFiles: true
-documentation: true
+testFiles: false
+documentation: false

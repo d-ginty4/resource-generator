@@ -92,11 +92,11 @@ interface SecurityDefinitions {
   };
 }
 
-interface Definitions {
+export interface Definitions {
   [definitionName: string]: SwaggerSchema;
 }
 
-interface SwaggerSchema {
+export interface SwaggerSchema {
   type: string;
   properties?: {
     [propertyName: string]: SwaggerSchemaProperty;
@@ -105,7 +105,7 @@ interface SwaggerSchema {
   items?: SwaggerSchema;
 }
 
-interface SwaggerSchemaProperty {
+export interface SwaggerSchemaProperty {
   type: string;
   format?: string;
   description?: string;

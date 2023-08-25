@@ -1,8 +1,8 @@
 import fs from "fs";
 import * as yaml from "js-yaml";
-import { Config } from "./Config";
+import { Config } from "./types/Config";
 import { Generator } from "./generators/generator";
-import { Swagger } from "./Swagger";
+import { Swagger } from "./types/Swagger";
 
 const config = readConfig();
 const swagger = readSwagger()
