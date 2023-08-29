@@ -13,7 +13,7 @@ export interface Swagger {
   externalDocs: ExternalDocs;
 }
 
-interface Info {
+export interface Info {
   description: string;
   version: string;
   title: string;
@@ -29,20 +29,20 @@ interface Info {
   };
 }
 
-interface Tag {
+export interface Tag {
   name: string;
   description: string;
   externalDocs: ExternalDocs;
 }
 
-interface Paths {
+export interface Paths {
   [path: string]: {
     [httpMethod: string]: SwaggerOperation;
   };  
 }
 
-interface SwaggerOperation {
-  tags?: string[];
+export interface SwaggerOperation {
+  tags: string[];
   summary?: string;
   description?: string;
   operationId: string;
@@ -58,7 +58,7 @@ interface SwaggerOperation {
   'x-purecloud-method-name': string
 }
 
-interface SwaggerParameter {
+export interface SwaggerParameter {
   name: string;
   in: string;
   description?: string;
@@ -68,7 +68,7 @@ interface SwaggerParameter {
   format?: string;
 }
 
-interface SwaggerResponse {
+export interface SwaggerResponse {
   description: string;
   schema?: {
     $ref: string
@@ -76,7 +76,7 @@ interface SwaggerResponse {
 }
 
 
-interface SecurityDefinitions {
+export interface SecurityDefinitions {
   'PureCloud OAuth': {
     type: string;
     authorizationUrl: string;
@@ -116,7 +116,7 @@ export interface SwaggerSchemaProperty {
 }
 
 
-interface Responses {
+export interface Responses {
     400: Resp
     401: Resp
     403: Resp
@@ -130,14 +130,14 @@ interface Responses {
     504: Resp
 }
 
-interface Resp {
+export interface Resp {
     description: string
     schema: {
         $ref: string
     }
 }
 
-interface ExternalDocs {
+export interface ExternalDocs {
   description: string;
   url: string;
 }

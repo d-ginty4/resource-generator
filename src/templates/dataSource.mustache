@@ -1,0 +1,40 @@
+package {{snakeName}}
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	gcloud "terraform-provider-genesyscloud/genesyscloud"
+)
+/*
+   The data_source_genesyscloud_{{snakeName}}.go contains the data source implementation
+   for the resource.
+*/
+
+// dataSource{{pascalName}}Read retrieves by name the id in question
+func dataSource{{pascalName}}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	sdkConfig := meta.(*gcloud.ProviderMeta).ClientConfig
+	proxy := new{{pascalName}}Proxy(sdkConfig)
+
+	name := d.Get("name").(string)
+
+	return gcloud.WithRetries(ctx, 15*time.Second, func() *resource.RetryError {
+		{{mainObjectCamel}}Id, retryable, err := proxy.get{{pascalName}}IdByName(ctx, name)
+
+		if err != nil && !retryable {
+			return resource.NonRetryableError(fmt.Errorf("Error {{englishName}} %s: %s", name, err))
+		}
+
+		if retryable {
+			return resource.RetryableError(fmt.Errorf("No {{englishName}} found with name %s", name))
+		}
+
+		d.SetId({{mainObjectCamel}}Id)
+		return nil
+	})
+}

@@ -1,0 +1,185 @@
+package {{snakeName}}
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/mypurecloud/platform-client-sdk-go/v105/platformclientv2"
+)
+
+/*
+The genesyscloud_{{snakeName}}_proxy.go file contains the proxy structures and methods that interact
+with the Genesys Cloud SDK. We use composition here for each function on the proxy so individual functions can be stubbed
+out during testing.
+*/
+
+// internalProxy holds a proxy instance that can be used throughout the package
+var internalProxy *{{camelName}}Proxy
+
+// Type definitions for each func on our proxy so we can easily mock them out later
+type create{{pascalName}}Func func(ctx context.Context, p *{{camelName}}Proxy, {{mainObjectCamel}} *platformclientv2.{{mainObjectGoSDK}}) (*platformclientv2.{{mainObjectGoSDK}}, error)
+type getAll{{pascalName}}Func func(ctx context.Context, p *{{camelName}}Proxy) (*[]platformclientv2.{{mainObjectGoSDK}}, error)
+type get{{pascalName}}ByIdFunc func(ctx context.Context, p *{{camelName}}Proxy, id string) ({{mainObjectCamel}} *platformclientv2.{{mainObjectGoSDK}}, responseCode int, err error)
+type get{{pascalName}}IdByNameFunc func(ctx context.Context, p *{{camelName}}Proxy, name string) (id string, retryable bool, err error)
+type update{{pascalName}}Func func(ctx context.Context, p *{{camelName}}Proxy, id string, {{mainObjectCamel}} *platformclientv2.{{mainObjectGoSDK}}) (*platformclientv2.{{mainObjectGoSDK}}, error)
+type delete{{pascalName}}Func func(ctx context.Context, p *{{camelName}}Proxy, id string) (responseCode int, err error)
+
+// {{camelName}}Proxy contains all of the methods that call genesys cloud APIs.
+type {{camelName}}Proxy struct {
+	clientConfig                  *platformclientv2.Configuration
+	{{apiCamel}}                  *platformclientv2.{{api}}
+	create{{pascalName}}Attr      create{{pascalName}}Func
+	getAll{{pascalName}}Attr      getAll{{pascalName}}Func
+	get{{pascalName}}ByIdAttr     get{{pascalName}}ByIdFunc
+	get{{pascalName}}IdByNameAttr get{{pascalName}}IdByNameFunc
+	update{{pascalName}}Attr      update{{pascalName}}Func
+	delete{{pascalName}}Attr      delete{{pascalName}}Func
+}
+
+// new{{pascalName}}Proxy initializes the {{englishName}} proxy with all of the data needed to communicate with Genesys Cloud
+func new{{pascalName}}Proxy(clientConfig *platformclientv2.Configuration) *{{camelName}}Proxy {
+	api := platformclientv2.New{{api}}WithConfig(clientConfig)
+	return &{{camelName}}Proxy{
+		clientConfig:                   clientConfig,
+		{{apiCamel}}:                    	api,
+		create{{pascalName}}Attr:       create{{pascalName}}Fn,
+		getAll{{pascalName}}Attr:       getAll{{pascalName}}Fn,
+		get{{pascalName}}ByIdAttr:     	get{{pascalName}}ByIdFn,
+		get{{pascalName}}IdByNameAttr: 	get{{pascalName}}IdByNameFn,
+		update{{pascalName}}Attr:      	update{{pascalName}}Fn,
+		delete{{pascalName}}Attr:      	delete{{pascalName}}Fn,
+	} 
+}
+
+// get{{pascalName}}Proxy acts as a singleton to for the internalProxy.  It also ensures
+// that we can still proxy our tests by directly setting internalProxy package variable
+func get{{pascalName}}Proxy(clientConfig *platformclientv2.Configuration) *{{camelName}}Proxy {
+	if internalProxy == nil {
+		internalProxy = new{{pascalName}}Proxy(clientConfig)
+	}
+
+	return internalProxy
+}
+
+// create{{pascalName}} creates a Genesys Cloud {{englishName}}
+func (p *{{camelName}}Proxy) create{{pascalName}}(ctx context.Context, {{camelName}} *platformclientv2.{{mainObjectGoSDK}}) (*platformclientv2.{{mainObjectGoSDK}}, error) {
+	return p.create{{pascalName}}Attr(ctx, p, {{camelName}})
+}
+
+// get{{pascalName}} retrieves all Genesys Cloud {{englishName}}
+func (p *{{camelName}}Proxy) getAll{{pascalName}}(ctx context.Context) (*[]platformclientv2.{{mainObjectGoSDK}}, error) {
+	return p.getAll{{pascalName}}Attr(ctx, p)
+}
+
+// get{{pascalName}}ById returns a single Genesys Cloud {{englishName}} by Id
+func (p *{{camelName}}Proxy) get{{pascalName}}ById(ctx context.Context, id string) ({{camelName}} *platformclientv2.{{mainObjectGoSDK}}, statusCode int, err error) {
+	return p.get{{pascalName}}ByIdAttr(ctx, p, id)
+}
+
+// get{{pascalName}}IdByName returns a single Genesys Cloud {{englishName}} by a name
+func (p *{{camelName}}Proxy) get{{pascalName}}IdByName(ctx context.Context, name string) (id string, retryable bool, err error) {
+	return p.get{{pascalName}}IdByNameAttr(ctx, p, name)
+}
+
+// update{{pascalName}} updates a Genesys Cloud {{englishName}}
+func (p *{{camelName}}Proxy) update{{pascalName}}(ctx context.Context, id string, {{camelName}} *platformclientv2.{{mainObjectGoSDK}}) (*platformclientv2.{{mainObjectGoSDK}}, error) {
+	return p.update{{pascalName}}Attr(ctx, p, id, {{camelName}})
+}
+
+// delete{{pascalName}} deletes a Genesys Cloud {{englishName}} by Id
+func (p *{{camelName}}Proxy) delete{{pascalName}}(ctx context.Context, id string) (statusCode int, err error) {
+	return p.delete{{pascalName}}Attr(ctx, p, id)
+}
+
+// create{{pascalName}}Fn is an implementation function for creating a Genesys Cloud {{englishName}}
+func create{{pascalName}}Fn(ctx context.Context, p *{{camelName}}Proxy, {{camelName}} *platformclientv2.{{mainObjectGoSDK}}) (*platformclientv2.{{mainObjectGoSDK}}, error) {
+	{{mainObjectCamel}}, _, err := p.{{apiCamel}}.{{createMethod}}(*{{camelName}})
+	if err != nil {
+		return nil, fmt.Errorf("Failed to create {{englishName}}: %s", err)
+	}
+
+	return {{mainObjectCamel}}, nil
+}
+
+// getAll{{pascalName}}Fn is the implementation for retrieving all {{englishName}} in Genesys Cloud
+func getAll{{pascalName}}Fn(ctx context.Context, p *{{camelName}}Proxy) (*[]platformclientv2.{{mainObjectGoSDK}}, error) {
+	var all{{mainObjectPascal}}s []platformclientv2.{{mainObjectGoSDK}}
+
+	for pageNum := 1; ; pageNum++ {
+		const pageSize = 100
+
+		{{mainObjectCamel}}s, _, err := p.{{apiCamel}}.{{getAllMethod}}(pageSize, pageNum, true, "", "", "", "")
+		if err != nil {
+			return nil, fmt.Errorf("Failed to get {{englishName}}: %v", err)
+		}
+
+		if {{mainObjectCamel}}s.Entities == nil || len(*{{mainObjectCamel}}s.Entities) == 0 {
+			break
+		}
+
+		for _, {{mainObjectCamel}} := range *{{mainObjectCamel}}s.Entities {
+			log.Printf("Dealing with {{mainObjectCamel}} id : %s", *{{mainObjectCamel}}.Id)
+			all{{mainObjectPascal}}s = append(all{{mainObjectPascal}}s, {{mainObjectCamel}})
+		}
+	}
+
+	return &all{{mainObjectPascal}}s, nil
+}
+
+// get{{pascalName}}ByIdFn is an implementation of the function to get a Genesys Cloud {{englishName}} by Id
+func get{{pascalName}}ByIdFn(ctx context.Context, p *{{camelName}}Proxy, id string) ({{camelName}} *platformclientv2.{{mainObjectGoSDK}}, statusCode int, err error) {
+	{{mainObjectCamel}}, resp, err := p.{{apiCamel}}.{{readMethod}}(id)
+	if err != nil {
+		
+	}
+
+	return {{mainObjectCamel}}, resp.StatusCode, nil
+}
+
+// get{{pascalName}}IdByNameFn is an implementation of the function to get a Genesys Cloud {{englishName}} by name
+func get{{pascalName}}IdByNameFn(ctx context.Context, p *{{camelName}}Proxy, name string) (id string, retryable bool, err error) {
+	const pageNum = 1
+	const pageSize = 100
+	{{mainObjectCamel}}s, _, err := p.{{apiCamel}}.{{getAllMethod}}(pageSize, pageNum, true, "", name, "", "")
+	if err != nil {
+		return "", false, fmt.Errorf("Error searching {{englishName}} %s: %s", name, err)
+	}
+
+	if {{mainObjectCamel}}s.Entities == nil || len(*{{mainObjectCamel}}s.Entities) == 0 {
+		return "", true, fmt.Errorf("No {{englishName}} found with name %s", name)
+	}
+
+	if len(*{{mainObjectCamel}}s.Entities) > 1 {
+		return "", false, fmt.Errorf("Too many values returned in look for {{englishName}}s.  Unable to choose 1 {{englishName}}.  Please refine search and continue.")
+	}
+
+	log.Printf("Retrieved the {{mainObjectCamel}} id %s by name %s", *(*{{mainObjectCamel}}s.Entities)[0].Id, name)
+	{{mainObjectCamel}} := (*{{mainObjectCamel}}s.Entities)[0]
+	return *{{mainObjectCamel}}.Id, false, nil
+}
+
+// update{{pascalName}}Fn is an implementation of the function to update a Genesys Cloud {{englishName}}
+func update{{pascalName}}Fn(ctx context.Context, p *{{camelName}}Proxy, id string, {{camelName}} *platformclientv2.{{mainObjectGoSDK}}) (*platformclientv2.{{mainObjectGoSDK}}, error) {
+	{{mainObjectCamel}}, _, err := get{{pascalName}}ByIdFn(ctx, p, id)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to get {{englishName}} by id %s: %s", id, err)
+	}
+
+	{{camelName}}.Version = {{mainObjectCamel}}.Version
+	{{camelName}}, _, err = p.{{apiCamel}}.{{updateMethod}}(id, *{{camelName}})
+	if err != nil {
+		return nil, fmt.Errorf("Failed to update {{englishName}}: %s", err)
+	}
+	return {{camelName}}, nil
+}
+
+// delete{{pascalName}}Fn is an implementation function for deleting a Genesys Cloud {{englishName}}
+func delete{{pascalName}}Fn(ctx context.Context, p *{{camelName}}Proxy, id string) (statusCode int, err error) {
+	resp, err := p.{{apiCamel}}.{{deleteMethod}}(id)
+	if err != nil {
+		return resp.StatusCode, fmt.Errorf("Failed to delete {{englishName}}: %s", err)
+	}
+
+	return resp.StatusCode, nil
+}

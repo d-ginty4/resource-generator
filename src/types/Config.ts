@@ -6,7 +6,7 @@ export interface Config {
   documentation?: boolean;
 }
 
-interface Operation {
+export interface Operation {
   type: string;
   method: string;
   path: string;

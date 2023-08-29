@@ -1,0 +1,73 @@
+package {{snakeName}}
+
+import (
+	gcloud "terraform-provider-genesyscloud/genesyscloud"
+	"terraform-provider-genesyscloud/genesyscloud/util/resourcedata"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/mypurecloud/platform-client-sdk-go/v105/platformclientv2"
+)
+
+/*
+The resource_genesyscloud_{{snakeName}}_utils.go file contains various helper methods to marshal
+and unmarshal data into formats consumable by Terraform and/or Genesys Cloud.
+*/
+
+// get{{pascalName}}FromResourceData maps data from schema ResourceData object to a platformclientv2.{{mainObjectGoSDK}}
+func get{{pascalName}}FromResourceData(d *schema.ResourceData) platformclientv2.{{mainObjectGoSDK}} {
+{{#basicProperties}}
+	{{propertyCamel}} := d.Get("{{propertySnake}}").({{type}})
+	{{/basicProperties}}
+
+	return platformclientv2.{{mainObjectGoSDK}}{
+	{{#basicProperties}}
+		{{propertyPascal}}: &{{propertyCamel}},
+	{{/basicProperties}}{{#complexProperties}}
+		{{{.}}}
+	{{/complexProperties}}
+	}
+}
+
+{{#nestedObjects}}
+// build{{objectPascal}}s maps an []interface{} into a Genesys Cloud *[]platformclientv2.{{objectGoSDK}}
+func build{{objectPascal}}s({{objectCamel}}s []interface{}) *[]platformclientv2.{{objectGoSDK}} {
+	{{objectCamel}}sSlice := make([]platformclientv2.{{objectGoSDK}}, 0)
+	for _, {{objectCamel}} := range {{objectCamel}}s {
+		var sdk{{objectPascal}} platformclientv2.{{objectGoSDK}}
+		{{objectCamel}}sMap, ok := {{objectCamel}}.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		{{#buildProperties}}
+		{{{.}}}
+		{{/buildProperties}}
+
+		{{objectCamel}}sSlice = append({{objectCamel}}sSlice, sdk{{objectPascal}})
+	}
+
+	return &{{objectCamel}}sSlice
+}
+
+{{/nestedObjects}}{{#nestedObjects}}
+// flatten{{objectPascal}}s maps a Genesys Cloud *[]platformclientv2.{{objectGoSDK}} into a []interface{}
+func flatten{{objectPascal}}s({{objectCamel}}s *[]platformclientv2.{{objectGoSDK}}) []interface{} {
+	if len(*{{objectCamel}}s) == 0 {
+		return nil
+	}
+
+	var {{objectCamel}}List []interface{}
+	for _, {{objectCamel}} := range *{{objectCamel}}s {
+		{{objectCamel}}Map := make(map[string]interface{})
+
+		{{#readProperties}}
+		{{{.}}}
+		{{/readProperties}}
+		
+		{{objectCamel}}List = append({{objectCamel}}List, {{objectCamel}}Map)
+	}
+
+	return {{objectCamel}}List
+}
+
+{{/nestedObjects}}
