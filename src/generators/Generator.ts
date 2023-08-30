@@ -21,8 +21,9 @@ export abstract class Generator {
   protected config: Config;
   protected swagger: Swagger;
   protected globalData: GlobalData;
-  protected ignoreProperties: string[];
-  protected basicTypes: string[];
+  protected nestedObjects: string[];
+  private ignorableProperties: string[];
+  private basicTypes: string[];
   abstract template: string;
   abstract outputLocation: string;
 
@@ -30,7 +31,8 @@ export abstract class Generator {
     this.config = this.setConfig();
     this.swagger = this.setSwagger();
     this.globalData = this.setGlobalData();
-    this.ignoreProperties = [
+    this.nestedObjects = this.setNestedObjects();
+    this.ignorableProperties = [
       "id",
       "dateCreated",
       "dateModified",
@@ -40,46 +42,13 @@ export abstract class Generator {
     this.basicTypes = ["string", "integer", "boolean"];
   }
 
-  /**
-   * Generate a file using a template and data
-   * @param template file template location
-   * @param data the data to be used by the template
-   * @param destination the destination of the output file
-   */
-  protected generateFile(template: string, data: object, destination: string) {
-    const templateText = fs.readFileSync(template, "utf-8");
-
-    const allData = { ...data, ...this.globalData };
-
-    // generate the resource test file from the template and data
-    const output = mustache.render(templateText, allData);
-
-    // Save the generated output to a file
-    fs.writeFileSync(destination, output, "utf-8");
-  }
-
-  protected isIgnorableProperty(propertyName: string): boolean {
-    return this.ignoreProperties.includes(propertyName);
-  }
-
-  protected isBasicType(type: string): boolean {
-    return this.basicTypes.includes(type);
-  }
-
-  protected extractObjectName(reference: string): string {
-    const segments = reference.split("/");
-    return segments[segments.length - 1];
-  }
-
-  // TODO: throw error if config is wrong
+  // setters
   private setConfig(): Config {
     const yamlFileContent = fs.readFileSync("config.yml", "utf-8");
     const data: Config = yaml.load(yamlFileContent) as Config;
     return data;
   }
 
-  // TODO: throw error if swagger is wrong?
-  // TODO: read swagger from url
   private setSwagger(): Swagger {
     const jsonFileContent = fs.readFileSync("swagger.json", "utf-8");
     const jsonData: Swagger = JSON.parse(jsonFileContent) as Swagger;
@@ -99,5 +68,36 @@ export abstract class Generator {
     };
 
     return data;
+  }
+
+  private setNestedObjects(): string[] {
+    return []
+  }
+
+  // helpers
+  protected isIgnorableProperty(propertyName: string): boolean {
+    return this.ignorableProperties.includes(propertyName);
+  }
+
+  protected isBasicType(type: string): boolean {
+    return this.basicTypes.includes(type);
+  }
+
+  /**
+   * Generate a file using a template and data
+   * @param template file template location
+   * @param data the data to be used by the template
+   * @param destination the destination of the output file
+   */
+  protected generateFile(template: string, destination: string, data?: object) {
+    const templateText = fs.readFileSync(template, "utf-8");
+
+    const allData = { ...this.globalData, ...data };
+
+    // generate the resource test file from the template and data
+    const output = mustache.render(templateText, allData);
+
+    // Save the generated output to a file
+    fs.writeFileSync(destination, output, "utf-8");
   }
 }

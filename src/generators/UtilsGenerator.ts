@@ -29,8 +29,8 @@ export class UtilsGenerator extends Generator {
 
   constructor() {
     super();
-    this.template = "src/templates/utils.mustache";
-    this.outputLocation = `output/${this.config.package}/utils.go`;
+    this.template = "src/templates/utils/utils.mustache";
+    this.outputLocation = `output/${this.config.package}/resource_genesyscloud_${this.globalData.snakeName}_utils.go`;
     this.nestedObjectNames = [];
     this.complexProperties = [];
   }
@@ -47,7 +47,7 @@ export class UtilsGenerator extends Generator {
     }
     utilsData.nestedObjects = nestedObjects;
 
-    this.generateFile(this.template, utilsData, this.outputLocation);
+    this.generateFile(this.template, this.outputLocation, utilsData);
   }
 
   private handleNestedObject(nestedObject: string): object {

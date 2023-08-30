@@ -1,0 +1,7 @@
+"{{name}}": {
+    Description: "{{description}}",{{#required}}
+    Required:    true,{{/required}}{{^required}}
+    Optional:    true,{{/required}}
+    Type:        {{type}},{{#nestedResource}}
+    Elem:        {{nestedResource}}Resource,{{/nestedResource}}
+},

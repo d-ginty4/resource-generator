@@ -12,8 +12,8 @@ export class ResourceGenerator extends Generator {
 
   constructor() {
     super();
-    this.template = "src/templates/resource.mustache";
-    this.outputLocation = `output/${this.config.package}/resource.go`;
+    this.template = "src/templates/resource/resource.mustache";
+    this.outputLocation = `output/${this.config.package}/resource_genesyscloud_${this.globalData.snakeName}.go`;
   }
 
   public generate() {
@@ -21,7 +21,7 @@ export class ResourceGenerator extends Generator {
       readProperties: this.generateReadStatements(),
     };
 
-    this.generateFile(this.template, resourceData, this.outputLocation);
+    this.generateFile(this.template, this.outputLocation, resourceData);
   }
 
   private generateReadStatements(): string[] {

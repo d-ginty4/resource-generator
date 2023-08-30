@@ -6,14 +6,14 @@ export class SchemaGenerator extends Generator {
   template: string;
   outputLocation: string;
   private objects: Definitions;
-  private nestedObjects: object[];
+  private nestedObjectsNew: object[];
 
   constructor() {
     super();
-    this.template = "src/templates/schema.mustache";
-    this.outputLocation = `output/${this.config.package}/schema.go`;
+    this.template = "src/templates/schema/schema.mustache";
+    this.outputLocation = `output/${this.config.package}/resource_genesyscloud_${this.globalData.snakeName}_schema.go`;
     this.objects = this.swagger.definitions;
-    this.nestedObjects = [];
+    this.nestedObjectsNew = [];
   }
 
   public generate() {
@@ -25,7 +25,7 @@ export class SchemaGenerator extends Generator {
       nestedObjects: this.nestedObjects,
     };
 
-    this.generateFile(this.template, schemaData, this.outputLocation);
+    this.generateFile(this.template, this.outputLocation, schemaData);
   }
 
   private createProperties(
@@ -64,7 +64,7 @@ export class SchemaGenerator extends Generator {
     data.type = schemaTypes.get(property.type);
 
     if (property.items !== undefined) {
-      const referenceObject = this.extractObjectName(property.items.$ref);
+      const referenceObject = property.items.$ref.split("/")[2];
       data.nestedResource = referenceObject;
       const nestedObject = {
         objectName: referenceObject,
@@ -73,7 +73,7 @@ export class SchemaGenerator extends Generator {
           this.objects[referenceObject].properties
         ),
       };
-      this.nestedObjects.push(nestedObject);
+      this.nestedObjectsNew.push(nestedObject);
     }
 
     if (isRequired) {

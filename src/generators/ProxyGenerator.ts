@@ -11,8 +11,8 @@ export class ProxyGenerator extends Generator {
 
   constructor() {
     super();
-    this.template = "src/templates/proxy.mustache";
-    this.outputLocation = `output/${this.config.package}/proxy.go`;
+    this.template = "src/templates/proxy/proxy.mustache";
+    this.outputLocation = `output/${this.config.package}/genesyscloud_${this.globalData.snakeName}_proxy.go`;
   }
 
   public generate() {
@@ -25,7 +25,7 @@ export class ProxyGenerator extends Generator {
     proxyData.apiCamel = pascalToCamel(proxyData.api);
     
     this.getMethodNames(proxyData);
-    this.generateFile(this.template, proxyData, this.outputLocation);
+    this.generateFile(this.template, this.outputLocation, proxyData);
   }
 
   private getMethodNames(proxyData: ProxyData) {

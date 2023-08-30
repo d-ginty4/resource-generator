@@ -6,13 +6,11 @@ export class DataSourceGenerator extends Generator {
 
   constructor() {
     super();
-    this.template = "src/templates/dataSource.mustache";
-    this.outputLocation = `output/${this.config.package}/dataSource.go`;
+    this.template = "src/templates/dataSource/dataSource.mustache";
+    this.outputLocation = `output/${this.config.package}/data_source_genesyscloud_${this.globalData.snakeName}.go`;
   }
 
   public generate() {
-    const dataSourceData = {};
-
-    this.generateFile(this.template, dataSourceData, this.outputLocation);
+    this.generateFile(this.template, this.outputLocation);
   }
 }
