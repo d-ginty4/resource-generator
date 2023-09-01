@@ -5,7 +5,7 @@ import * as mustache from "mustache";
 
 // types
 import { Config } from "../types/Config";
-import { Swagger } from "../types/Swagger";
+import { Definitions, Swagger, SwaggerSchema, SwaggerSchemaProperty } from "../types/Swagger";
 import { GlobalData } from "../types/GlobalData";
 
 // helper functions
@@ -18,28 +18,57 @@ import {
 } from "../utils/variableRenames";
 
 export abstract class Generator {
-  protected config: Config;
-  protected swagger: Swagger;
-  protected globalData: GlobalData;
-  protected nestedObjects: string[];
-  private ignorableProperties: string[];
-  private basicTypes: string[];
+  // abstract properties
   abstract template: string;
   abstract outputLocation: string;
 
+  // protected properties
+  protected static config: Config;
+  protected static swagger: Swagger;
+  protected static globalData: GlobalData;
+  protected static nestedObjects: string[];
+  protected static mainObject: SwaggerSchema;
+
+  // private properties
+  private static ignorableProperties: string[];
+  private static basicTypes: string[];
+
   constructor() {
-    this.config = this.setConfig();
-    this.swagger = this.setSwagger();
-    this.globalData = this.setGlobalData();
-    this.nestedObjects = this.setNestedObjects();
-    this.ignorableProperties = [
-      "id",
-      "dateCreated",
-      "dateModified",
-      "version",
-      "selfUri",
-    ];
-    this.basicTypes = ["string", "integer", "boolean"];
+    // Avoid resetting data if it's already set
+    if (!Generator.config) {
+      Generator.config = this.setConfig();
+    }
+    if (!Generator.swagger) {
+      Generator.swagger = this.setSwagger();
+    }
+    if (!Generator.globalData) {
+      Generator.globalData = this.setGlobalData();
+    }
+    if (!Generator.nestedObjects) {
+      Generator.nestedObjects = this.setNestedObjects();
+    }
+    if (!Generator.ignorableProperties) {
+      Generator.ignorableProperties = [
+        "id",
+        "dateCreated",
+        "dateModified",
+        "version",
+        "selfUri",
+      ];
+    }
+    if (!Generator.basicTypes) {
+      Generator.basicTypes = ["string", "integer", "boolean"];
+    }
+    if (!Generator.mainObject) {
+      Generator.mainObject =
+        Generator.swagger.definitions[Generator.config.mainObject];
+
+      if (!Generator.mainObject) {
+        throw new Error(
+          `The main object ${Generator.config.mainObject} does not exist in the swagger file`
+        );
+      }
+    }
   }
 
   // setters
@@ -56,48 +85,170 @@ export abstract class Generator {
   }
 
   private setGlobalData(): GlobalData {
-    const resourceName = this.config.package;
+    const resourceName = Generator.config.package;
     const data: GlobalData = {
       englishName: snakeToEnglish(resourceName),
       camelName: snakeToCamel(resourceName),
       pascalName: snakeToPascal(resourceName),
       snakeName: resourceName,
-      mainObject: this.config.rootObject,
-      mainObjectCamel: pascalToCamel(this.config.rootObject),
-      mainObjectGoSDK: goSdkName(this.config.rootObject),
+      mainObject: Generator.config.mainObject,
+      mainObjectCamel: pascalToCamel(Generator.config.mainObject),
+      mainObjectGoSDK: goSdkName(Generator.config.mainObject),
     };
 
     return data;
   }
 
   private setNestedObjects(): string[] {
-    return []
+    const definitions: Definitions = Generator.swagger.definitions;
+    const objectNames: Set<string> = new Set(); // A set prevents duplicated objects being added
+
+    function findObjects(obj: SwaggerSchema) {
+      const properties = obj.properties;
+      // Check if there's properties
+      if (properties) {
+        // Loop through every property
+        for (const property of Object.values(properties)) {
+          // Handle nested object
+          if (property.$ref) {
+            const objectName = property.$ref.split("/")[2];
+            objectNames.add(objectName);
+            findObjects(definitions[objectName]);
+            return;
+          }
+          // Handle array of nested objects
+          else if (
+            property.type === "array" &&
+            property.items?.type !== "string" &&
+            property.items?.$ref
+          ) {
+            const objectName = property.items.$ref.split("/")[2];
+            objectNames.add(objectName);
+            findObjects(definitions[objectName]);
+            return;
+          }
+        }
+      }
+    }
+
+    // Start searching at the main object
+    findObjects(definitions[Generator.config.mainObject]);
+    return Array.from(objectNames);
   }
 
   // helpers
   protected isIgnorableProperty(propertyName: string): boolean {
-    return this.ignorableProperties.includes(propertyName);
+    return Generator.ignorableProperties.includes(propertyName);
   }
 
   protected isBasicType(type: string): boolean {
-    return this.basicTypes.includes(type);
+    return Generator.basicTypes.includes(type);
   }
 
+  protected hasNestedObject(): boolean {
+    if (Generator.nestedObjects.length > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  // Evaluate the type of the property
+  protected evaluatePropertyType(
+    name: string,
+    property: SwaggerSchemaProperty
+  ): string {
+    // Check if property is a basic type (string, integer, etc)
+    if (this.isBasicType(property.type)) {
+      return "basic type";
+    }
+    // Check if property is nested object
+    else if (!property.items && property.$ref) {
+      return "nested object";
+    }
+    // Check if property is an array
+    else if (property.type === "array") {
+      // check if array is an array of strings
+      if (property.items?.type) {
+        return "string array";
+      }
+      // check if array is an array of nested objects
+      else if (property.items?.$ref) {
+        return "nested object array";
+      } else {
+        throw new Error(`Unknown array property ${name}: ${property}`);
+      }
+    } else {
+      throw new Error(`Unknown property ${name}: ${property}`);
+    }
+  }
+  
   /**
    * Generate a file using a template and data
    * @param template file template location
-   * @param data the data to be used by the template
    * @param destination the destination of the output file
+   * @param data the data to be used by the template
    */
   protected generateFile(template: string, destination: string, data?: object) {
+    // check if the template file exists
+    try {
+      fs.accessSync(template, fs.constants.R_OK);
+    } catch (err) {
+      throw new Error(`Template file ${template} does not exist`);
+    }
+    // read the template file
     const templateText = fs.readFileSync(template, "utf-8");
 
-    const allData = { ...this.globalData, ...data };
+    // combine the global data and the data passed in
+    const allData = { ...Generator.globalData, ...data };
 
-    // generate the resource test file from the template and data
+    // generate the file from the template and data
     const output = mustache.render(templateText, allData);
 
     // Save the generated output to a file
     fs.writeFileSync(destination, output, "utf-8");
+  }
+
+  /**
+   * This function will generate a template an return the content as a string
+   * @param template file template location
+   * @param data the data to be used by the template
+   */
+  protected generateTemplateStr(template: string, data: object): string {
+    // check if the template file exists
+    try {
+      fs.accessSync(template, fs.constants.R_OK);
+    } catch (err) {
+      throw new Error(`Template file ${template} does not exist`);
+    }
+    // read the template file
+    const templateText = fs.readFileSync(template, "utf-8");
+
+    // generate the template
+    const output = mustache.render(templateText, data);
+
+    return output;
+  }
+
+  /**
+   * Return the output location of a file type e.g. schema file
+   * @param fileType file type e.g. schema
+   */
+  protected getOutputLocation(fileType: string): string {
+    const packageName = Generator.config.package;
+    switch (fileType) {
+      case "schema":
+        return `output/${packageName}/resource_genesyscloud_${packageName}_schema.go`;
+      case "proxy":
+        return `output/${packageName}/genesyscloud_${packageName}_proxy.go`;
+      case "resource":
+        return `output/${packageName}/resource_genesyscloud_${packageName}.go`;
+      case "utils":
+        return `output/${packageName}/resource_genesyscloud_${packageName}_utils.go`;
+      case "dataSource":
+        return `output/${packageName}/data_source_genesyscloud_${packageName}.go`;
+      default:
+        throw new Error(`Unknown file type ${fileType}`);
+    }
   }
 }

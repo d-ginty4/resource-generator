@@ -42,7 +42,7 @@ func new{{pascalName}}Proxy(clientConfig *platformclientv2.Configuration) *{{cam
 	api := platformclientv2.New{{api}}WithConfig(clientConfig)
 	return &{{camelName}}Proxy{
 		clientConfig:                   clientConfig,
-		{{apiCamel}}:                    	api,
+		{{apiCamel}}:                   api,
 		create{{pascalName}}Attr:       create{{pascalName}}Fn,
 		getAll{{pascalName}}Attr:       getAll{{pascalName}}Fn,
 		get{{pascalName}}ByIdAttr:     	get{{pascalName}}ByIdFn,

@@ -1,6 +1,6 @@
 export interface Config {
   package: string;
-  rootObject: string;
+  mainObject: string;
   operations: Operation[];
   testFiles?: boolean;
   documentation?: boolean;

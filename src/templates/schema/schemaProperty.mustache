@@ -1,7 +1,8 @@
 "{{name}}": {
-    Description: "{{description}}",{{#required}}
+    Description: "{{{description}}}",{{#required}}
     Required:    true,{{/required}}{{^required}}
     Optional:    true,{{/required}}
-    Type:        {{type}},{{#nestedResource}}
-    Elem:        {{nestedResource}}Resource,{{/nestedResource}}
+    Type:        {{type}},{{#singleItem}}
+    MaxItems:    1{{/singleItem}}{{#element}}
+    Elem:        {{element}}{{/element}}
 },

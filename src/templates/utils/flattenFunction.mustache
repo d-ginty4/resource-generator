@@ -1,0 +1,19 @@
+// flatten{{objectPascal}}s maps a Genesys Cloud *[]platformclientv2.{{objectGoSDK}} into a []interface{}
+func flatten{{objectPascal}}s({{objectCamel}}s *[]platformclientv2.{{objectGoSDK}}) []interface{} {
+	if len(*{{objectCamel}}s) == 0 {
+		return nil
+	}
+
+	var {{objectCamel}}List []interface{}
+	for _, {{objectCamel}} := range *{{objectCamel}}s {
+		{{objectCamel}}Map := make(map[string]interface{})
+
+		{{#flattenProperties}}
+		{{{.}}}
+		{{/flattenProperties}}
+		
+		{{objectCamel}}List = append({{objectCamel}}List, {{objectCamel}}Map)
+	}
+
+	return {{objectCamel}}List
+}

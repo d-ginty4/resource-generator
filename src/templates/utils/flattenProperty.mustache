@@ -1,0 +1,4 @@
+{{#nestedObjectFunc}}
+resourcedata.SetMapInterfaceArrayValueIfNotNil({{objectName}}Map, "{{property}}", {{objectName}}.{{objectProperty}}, {{nestedObjectFunc}}){{/nestedObjectFunc}}{{^nestedObjectFunc}}
+resourcedata.SetMapValueIfNotNil({{objectName}}Map, "{{property}}", {{objectName}}.{{objectProperty}}){{/nestedObjectFunc}}
+

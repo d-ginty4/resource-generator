@@ -1,5 +1,5 @@
 package: outbound_callabletimeset
-rootObject: CallableTimeSet
+mainObject: CallableTimeSet
 operations:
   - type: create
     method: POST

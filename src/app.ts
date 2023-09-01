@@ -9,7 +9,6 @@ import { Config } from "./types/Config";
 import { SchemaGenerator } from "./generators/SchemaGenerator";
 import { ProxyGenerator } from "./generators/ProxyGenerator";
 import { ResourceGenerator } from "./generators/ResourceGenerator";
-import { UtilsGenerator } from "./generators/UtilsGenerator";
 import { DataSourceGenerator } from "./generators/DataSourceGenerator"; 
 
 // Read config file
@@ -31,10 +30,6 @@ proxyGenerator.generate();
 // Generate resource file
 const resourceGenerator = new ResourceGenerator();
 resourceGenerator.generate();
-
-// Generate utils file
-const utilsGenerator = new UtilsGenerator();
-utilsGenerator.generate();
 
 // Generate data source file
 const dataSourceGenerator = new DataSourceGenerator();

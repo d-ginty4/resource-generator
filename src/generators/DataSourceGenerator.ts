@@ -1,3 +1,4 @@
+import templates from "../utils/templates";
 import { Generator } from "./Generator";
 
 export class DataSourceGenerator extends Generator {
@@ -6,8 +7,8 @@ export class DataSourceGenerator extends Generator {
 
   constructor() {
     super();
-    this.template = "src/templates/dataSource/dataSource.mustache";
-    this.outputLocation = `output/${this.config.package}/data_source_genesyscloud_${this.globalData.snakeName}.go`;
+    this.template = templates.get("dataSource")!;
+    this.outputLocation = this.getOutputLocation("dataSource");
   }
 
   public generate() {
