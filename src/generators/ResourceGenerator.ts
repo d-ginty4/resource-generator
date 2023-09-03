@@ -27,11 +27,6 @@ export class ResourceGenerator extends Generator {
     console.info(
       `Created resource file for ${Generator.globalData.englishName}`
     );
-
-    if (this.hasNestedObject()){
-      const utilsGenerator = new UtilsGenerator();
-      utilsGenerator.generate();
-    }
   }
 
   // generate the statements needed read the properties of the main object

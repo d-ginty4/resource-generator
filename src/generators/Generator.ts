@@ -2,6 +2,7 @@
 import * as yaml from "js-yaml";
 import * as fs from "fs";
 import * as mustache from "mustache";
+import * as handlebars from "handlebars";
 
 // types
 import { Config } from "../types/Config";
@@ -189,43 +190,49 @@ export abstract class Generator {
    * @param destination the destination of the output file
    * @param data the data to be used by the template
    */
-  protected generateFile(template: string, destination: string, data?: object) {
+  protected generateFile(templateFile: string, destination: string, data?: object) {
     // check if the template file exists
     try {
-      fs.accessSync(template, fs.constants.R_OK);
+      fs.accessSync(templateFile, fs.constants.R_OK);
     } catch (err) {
-      throw new Error(`Template file ${template} does not exist`);
+      throw new Error(`Template file ${templateFile} does not exist`);
     }
     // read the template file
-    const templateText = fs.readFileSync(template, "utf-8");
+    const templateText = fs.readFileSync(templateFile, "utf-8");
+
+    // Compile the template
+    const template = handlebars.compile(templateText);
 
     // combine the global data and the data passed in
     const allData = { ...Generator.globalData, ...data };
 
     // generate the file from the template and data
-    const output = mustache.render(templateText, allData);
+    const output = template(allData);
 
     // Save the generated output to a file
     fs.writeFileSync(destination, output, "utf-8");
   }
 
   /**
-   * This function will generate a template an return the content as a string
+   * This function will generate a template and return the content as a string
    * @param template file template location
    * @param data the data to be used by the template
    */
-  protected generateTemplateStr(template: string, data: object): string {
+  protected generateTemplateStr(templateLocation: string, data: object): string {
     // check if the template file exists
     try {
-      fs.accessSync(template, fs.constants.R_OK);
+      fs.accessSync(templateLocation, fs.constants.R_OK);
     } catch (err) {
-      throw new Error(`Template file ${template} does not exist`);
+      throw new Error(`Template file ${templateLocation} does not exist`);
     }
     // read the template file
-    const templateText = fs.readFileSync(template, "utf-8");
+    const templateText = fs.readFileSync(templateLocation, "utf-8");
+
+    // Compile the template
+    const template = handlebars.compile(templateText);
 
     // generate the template
-    const output = mustache.render(templateText, data);
+    const output = template(data);
 
     return output;
   }

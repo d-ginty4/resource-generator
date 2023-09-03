@@ -8,8 +8,8 @@ func build{{objectPascal}}s({{objectCamel}}s []interface{}) *[]platformclientv2.
 			continue
 		}
 
-		{{#buildProperties}}
-		{{{.}}}
+		{{#each buildProperties as |buildProperty|}}
+			{{{buildProperty}}}
 		{{/buildProperties}}
 
 		{{objectCamel}}sSlice = append({{objectCamel}}sSlice, sdk{{objectPascal}})

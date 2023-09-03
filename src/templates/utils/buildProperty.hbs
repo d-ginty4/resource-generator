@@ -1,0 +1,9 @@
+{{#if (eq type "string")}}
+    resourcedata.BuildSDKStringValueIfNotNil(&sdk{{objectName}}.{{objectProperty}}, {{objectName}}Map, "{{property}}")
+{{else if (eq type "bool")}}
+    {{objectName}}.{{objectProperty}} = platformclientv2.Bool(sdk{{objectName}}Map["{{property}}"].(bool))
+{{else if (eq type "integer")}}
+    sdk{{objectName}}.{{objectProperty}} = platformclientv2.Int(sdk{{objectName}}Map["{{property}}"].(int))
+{{else if (eq type "nested object") || (eq type "nested objects array")}}
+    resourcedata.BuildSDKInterfaceArrayValueIfNotNil(&sdk{{objectName}}.{{objectProperty}}, {{objectName}}Map, "{{property}}", {{nestedObjectFunc}})
+{{/if}}

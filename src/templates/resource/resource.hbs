@@ -76,9 +76,12 @@ func read{{pascalName}}(ctx context.Context, d *schema.ResourceData, meta interf
 
 		cc := consistency_checker.NewConsistencyCheck(ctx, d, meta, Resource{{pascalName}}())
 
-		{{#readProperties}}
-		{{{.}}}
-		{{/readProperties}}
+		{{#if readProperties}}
+			{{#each readProperties as |readProperty|}}
+				{{{readProperty}}}
+			{{/each}}
+		{{/if}}
+		
 
 		log.Printf("Read {{englishName}} %s %s", d.Id(), *{{mainObjectCamel}}.Name)
 		return cc.CheckState()

@@ -8,11 +8,18 @@ import {
 } from "../utils/variableRenames";
 import { Generator } from "./Generator";
 
-interface FlattenPropertyData {
+interface NestedData {
+  objectPascal: string;
+  objectCamel: string;
+  objectGoSdk: string;
+}
+
+interface NestedObjectPropertyData {
   objectName: string;
   property: string;
   objectProperty: string;
   nestedObjectFunc?: string;
+  type?: string;
 }
 
 export class UtilsGenerator extends Generator {
@@ -28,12 +35,64 @@ export class UtilsGenerator extends Generator {
   // generate utils file
   public generate() {
     const utilsData = {
-      //basicProperties: this.setProperties(Generator.config.mainObject),
-      //complexProperties: this.complexProperties,
+      resourceDataFunc: this.generateResourceDataFunc(),
       nestedObjects: this.handleNestedObjects(),
     };
 
     this.generateFile(this.template, this.outputLocation, utilsData);
+  }
+
+  private generateResourceDataFunc(): string {
+    const resourceDataFuncData = {
+      pascalName: Generator.globalData.pascalName,
+      mainObjectGoSDK: Generator.globalData.mainObjectGoSDK,
+      basicProperties: this.generateBasicProperties(),
+      complexProperties: this.generateComplexProperties(),
+    };
+    return this.generateTemplateStr(templates.get("createResourceData")!, resourceDataFuncData);
+  }
+
+  private generateBasicProperties(): object[] {
+    const basicProperties: object[] = [];
+
+    for (const [name, property] of Object.entries(
+      Generator.swagger.definitions[Generator.config.mainObject].properties!
+    )) {
+      if (this.evaluatePropertyType(name, property) === "basic type") {
+        basicProperties.push({
+          propertyCamel: name,
+          propertySnake: camelToSnake(name),
+          propertyPascal: camelToPascal(name),
+          type: property.type,
+        });
+      }
+    }
+    return basicProperties;
+  }
+
+  private generateComplexProperties(): string[] {
+    const complexProperties: string[] = [];
+
+    for (const [name, property] of Object.entries(
+      Generator.swagger.definitions[Generator.config.mainObject].properties!
+    )) {
+      if (this.evaluatePropertyType(name, property) === "nested object") {
+        complexProperties.push(
+          `build${camelToPascal(name)}(d.Get("${camelToSnake(name)}").(interface{}))`
+        );
+      }
+      if (
+        this.evaluatePropertyType(name, property) === "nested objects array"
+      ) {
+        complexProperties.push(
+          `build${camelToPascal(name)}s(d.Get("${camelToSnake(
+            name
+          )}").([]interface{}))`
+        );
+      }
+    }
+
+    return complexProperties;
   }
 
   // creates a build and flatten function for each nested object
@@ -57,20 +116,12 @@ export class UtilsGenerator extends Generator {
 
       console.info(`Creating build function for ${nestedObjectName}`);
       nestedObjectFunctions.push(
-        this.generateBuildFunction(
-          nestedObjectName,
-          nestedObject,
-          nestedObjectData
-        )
+        this.generateBuildFunction(nestedObject, nestedObjectData)
       );
 
       console.info(`Creating flatten function for ${nestedObjectName}`);
       nestedObjectFunctions.push(
-        this.generateFlattenFunction(
-          nestedObjectName,
-          nestedObject,
-          nestedObjectData
-        )
+        this.generateFlattenFunction(nestedObject, nestedObjectData)
       );
       console.log(`Created util functions for ${nestedObjectName}`);
     }
@@ -80,37 +131,75 @@ export class UtilsGenerator extends Generator {
 
   // generates a build function for a nested object
   private generateBuildFunction(
-    nestedObjectName: string,
     nestedObject: SwaggerSchema,
-    objectData: object
+    objectData: NestedData
   ): string {
-    const buildFunctionTemplate = templates.get("buildFunction")!;
-    const buildFunctionData = {};
+    const buildProperties: string[] = [];
 
-    return this.generateTemplateStr(buildFunctionTemplate, {
-      ...buildFunctionData,
+    function generateBuildProperty(
+      name: string,
+      property: SwaggerSchemaProperty
+    ): string {
+      const buildPropertyData: NestedObjectPropertyData = {
+        objectName: objectData.objectPascal,
+        property: camelToSnake(name),
+        objectProperty: camelToPascal(name),
+      };
+
+      switch (this.evaluatePropertyType(name, property)) {
+        case "basic type":
+          buildPropertyData.type = property.type!;
+          break;
+        case "nested object":
+          if (property.items?.$ref) {
+            buildPropertyData.type = "nested object";
+            buildPropertyData.nestedObjectFunc = `build${
+              property.items.$ref.split("/")[2]
+            }`;
+          }
+          break;
+        case "string array":
+          break;
+        case "nested objects array":
+          if (property.items?.$ref) {
+            buildPropertyData.type = "nested objects array";
+            buildPropertyData.nestedObjectFunc = `build${
+              property.items.$ref.split("/")[2]
+            }s`;
+          }
+          break;
+      }
+      return this.generateTemplateStr(
+        templates.get("buildProperty")!,
+        buildPropertyData
+      );
+    }
+
+    if (nestedObject.properties) {
+      for (const [name, property] of Object.entries(nestedObject.properties)) {
+        buildProperties.push(generateBuildProperty(name, property));
+      }
+    }
+    return this.generateTemplateStr(templates.get("buildFunction")!, {
       ...objectData,
+      buildProperties: buildProperties,
     });
   }
 
   // generates a flatten function for a nested object
   private generateFlattenFunction(
-    nestedObjectName: string,
     nestedObject: SwaggerSchema,
-    objectData: object
+    objectData: NestedData
   ): string {
-    const flattenFunctionTemplate = templates.get("flattenFunction")!;
     const flattenProperties: string[] = [];
-    const properties = nestedObject.properties;
 
+    // generates a flatten statement for a property
     function generateFlattenProperty(
       name: string,
       property: SwaggerSchemaProperty
-    ) {
-      const flattenPropertyTemplate = templates.get("flattenProperty")!;
-
-      const flattenPropertyData: FlattenPropertyData = {
-        objectName: nestedObjectName,
+    ): string {
+      const flattenPropertyData: NestedObjectPropertyData = {
+        objectName: objectData.objectPascal,
         property: camelToSnake(name),
         objectProperty: camelToPascal(name),
       };
@@ -133,27 +222,24 @@ export class UtilsGenerator extends Generator {
           }
           break;
         default:
-          throw new Error(`Invalid property type for ${name}`);
+          throw new Error(`Unable to handle property ${name}: ${property}`)
       }
+      
       return this.generateTemplateStr(
-        flattenPropertyTemplate,
+        templates.get("flattenProperty")!,
         flattenPropertyData
       );
     }
 
-    if (properties) {
-      for (const [name, property] of Object.entries(properties)) {
+    if (nestedObject.properties) {
+      for (const [name, property] of Object.entries(nestedObject.properties)) {
         flattenProperties.push(generateFlattenProperty(name, property));
       }
     }
 
-    const flattenFunctionData = {
-      flattenProperties: flattenProperties,
-    };
-
-    return this.generateTemplateStr(flattenFunctionTemplate, {
-      ...flattenFunctionData,
+    return this.generateTemplateStr(templates.get("flattenFunction")!, {
       ...objectData,
+      flattenProperties: flattenProperties,
     });
   }
 }
