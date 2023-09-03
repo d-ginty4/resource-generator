@@ -14,11 +14,11 @@ and unmarshal data into formats consumable by Terraform and/or Genesys Cloud.
 */
 
 {{#if resourceDataFunc}}
-	{{resourceDataFunc}}
+{{{resourceDataFunc}}}
 {{/if}}
 
 {{#if nestedObjects}}
-	{{#each nestedObjects as |nestedObjectFunc|}}
-		{{nestedObjectFunc}}
-	{{/each}}
+{{#each nestedObjects as |nestedObjectFunc|}}
+{{{nestedObjectFunc}}}
+{{/each}}
 {{/if}}

@@ -1,9 +1,19 @@
 {{#if (eq type "string")}}
-    resourcedata.BuildSDKStringValueIfNotNil(&sdk{{objectName}}.{{objectProperty}}, {{objectName}}Map, "{{property}}")
-{{else if (eq type "bool")}}
-    {{objectName}}.{{objectProperty}} = platformclientv2.Bool(sdk{{objectName}}Map["{{property}}"].(bool))
-{{else if (eq type "integer")}}
-    sdk{{objectName}}.{{objectProperty}} = platformclientv2.Int(sdk{{objectName}}Map["{{property}}"].(int))
-{{else if (eq type "nested object") || (eq type "nested objects array")}}
-    resourcedata.BuildSDKInterfaceArrayValueIfNotNil(&sdk{{objectName}}.{{objectProperty}}, {{objectName}}Map, "{{property}}", {{nestedObjectFunc}})
+resourcedata.BuildSDKStringValueIfNotNil(&sdk{{objectPascalName}}.{{objectProperty}}, {{objectName}}sMap, "{{property}}")
+{{else}}
+{{#if (eq type "bool")}}
+{{objectName}}.{{objectProperty}} = platformclientv2.Bool(sdk{{objectPascalName}}sMap["{{property}}"].(bool))
+{{else}}
+{{#if (eq type "integer")}}
+sdk{{objectPascalName}}.{{objectProperty}} = platformclientv2.Int({{objectName}}sMap["{{property}}"].(int))
+{{else}}
+{{#if (eq type "nested object")}}
+resourcedata.BuildSDKInterfaceArrayValueIfNotNil(&sdk{{objectPascalName}}.{{objectProperty}}, {{objectName}}Map, "{{property}}", {{nestedObjectFunc}})
+{{else}}
+{{#if (eq type "nested object array")}}
+resourcedata.BuildSDKInterfaceArrayValueIfNotNil(&sdk{{objectPascalName}}.{{objectProperty}}, {{objectName}}sMap, "{{property}}", {{nestedObjectFunc}})
+{{/if}}
+{{/if}}
+{{/if}}
+{{/if}}
 {{/if}}

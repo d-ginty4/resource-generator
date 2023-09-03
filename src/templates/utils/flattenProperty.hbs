@@ -1,4 +1,6 @@
 {{#if nestedObjectFunc}}
-resourcedata.SetMapInterfaceArrayValueIfNotNil({{objectName}}Map, "{{property}}", {{objectName}}.{{objectProperty}}, {{nestedObjectFunc}}){{else}}
-resourcedata.SetMapValueIfNotNil({{objectName}}Map, "{{property}}", {{objectName}}.{{objectProperty}}){{/if}}
+resourcedata.SetMapInterfaceArrayValueIfNotNil({{objectName}}Map, "{{property}}", {{objectName}}.{{objectProperty}}, {{nestedObjectFunc}})
+{{else}}
+resourcedata.SetMapValueIfNotNil({{objectName}}Map, "{{property}}", {{objectName}}.{{objectProperty}})
+{{/if}}
 

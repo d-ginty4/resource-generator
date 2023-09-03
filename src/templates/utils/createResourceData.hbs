@@ -1,21 +1,21 @@
 // get{{pascalName}}FromResourceData maps data from schema ResourceData object to a platformclientv2.{{mainObjectGoSDK}}
 func get{{pascalName}}FromResourceData(d *schema.ResourceData) platformclientv2.{{mainObjectGoSDK}} {
 	{{#if basicProperties}}
-        {{#each basicProperties as |property|}}
-            {{property.propertyCamel}} := d.Get("{{property.propertySnake}}").({{property.type}})
-        {{/each}}
+    {{#each basicProperties as |property|}}
+    {{property.propertyCamel}} := d.Get("{{property.propertySnake}}").({{property.type}})
+    {{/each}}
     {{/if}}
 
 	return platformclientv2.{{mainObjectGoSDK}}{
-	{{#if basicProperties}}
+        {{#if basicProperties}}
         {{#each basicProperties as |property|}}
-            {{property.propertyPascal}}: &{{property.propertyCamel}},
+        {{property.propertyPascal}}: &{{{property.propertyCamel}}},
         {{/each}}
-    {{/if}}
-    {{#if complexProperties}}
+        {{/if}}
+        {{#if complexProperties}}
         {{#each complexProperties as |property|}}
-            {{{property}}}
+        {{{property}}}
         {{/each}}
-	{{/if}}
+        {{/if}}
 	}
 }

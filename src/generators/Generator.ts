@@ -1,7 +1,6 @@
 // packages
 import * as yaml from "js-yaml";
 import * as fs from "fs";
-import * as mustache from "mustache";
 import * as handlebars from "handlebars";
 
 // types
@@ -56,6 +55,9 @@ export abstract class Generator {
         "version",
         "selfUri",
       ];
+      handlebars.registerHelper("eq", function (a, b) {
+        return a === b;
+      });
     }
     if (!Generator.basicTypes) {
       Generator.basicTypes = ["string", "integer", "boolean"];
