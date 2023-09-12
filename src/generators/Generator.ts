@@ -5,7 +5,12 @@ import * as handlebars from "handlebars";
 
 // types
 import { Config } from "../types/Config";
-import { Definitions, Swagger, SwaggerSchema, SwaggerSchemaProperty } from "../types/Swagger";
+import {
+  Definitions,
+  Swagger,
+  SwaggerSchema,
+  SwaggerSchemaProperty,
+} from "../types/Swagger";
 import { GlobalData } from "../types/GlobalData";
 
 // helper functions
@@ -28,6 +33,7 @@ export abstract class Generator {
   protected static globalData: GlobalData;
   protected static nestedObjects: string[];
   protected static mainObject: SwaggerSchema;
+  protected static skeltonStructure: boolean;
 
   // private properties
   private static ignorableProperties: string[];
@@ -37,6 +43,10 @@ export abstract class Generator {
     // Avoid resetting data if it's already set
     if (!Generator.config) {
       Generator.config = this.setConfig();
+      if (!Generator.config.operations) {
+        console.info("No operations given, generating skeleton structure");
+        Generator.skeltonStructure = true;
+      }
     }
     if (!Generator.swagger) {
       Generator.swagger = this.setSwagger();
@@ -185,14 +195,18 @@ export abstract class Generator {
       throw new Error(`Unknown property ${name}: ${property}`);
     }
   }
-  
+
   /**
    * Generate a file using a template and data
    * @param template file template location
    * @param destination the destination of the output file
    * @param data the data to be used by the template
    */
-  protected generateFile(templateFile: string, destination: string, data?: object) {
+  protected generateFile(
+    templateFile: string,
+    destination: string,
+    data?: object
+  ) {
     // check if the template file exists
     try {
       fs.accessSync(templateFile, fs.constants.R_OK);
@@ -206,8 +220,8 @@ export abstract class Generator {
     const template = handlebars.compile(templateText);
 
     // combine the global data and the data passed in
-    const allData = { ...Generator.globalData, ...data };
-
+    const  allData = { ...Generator.globalData, ...data };
+    
     // generate the file from the template and data
     const output = template(allData);
 
@@ -220,7 +234,10 @@ export abstract class Generator {
    * @param template file template location
    * @param data the data to be used by the template
    */
-  protected generateTemplateStr(templateLocation: string, data: object): string {
+  protected generateTemplateStr(
+    templateLocation: string,
+    data: object
+  ): string {
     // check if the template file exists
     try {
       fs.accessSync(templateLocation, fs.constants.R_OK);

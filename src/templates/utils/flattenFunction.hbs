@@ -8,8 +8,8 @@ func flatten{{objectPascal}}s({{objectCamel}}s *[]platformclientv2.{{objectGoSDK
 	for _, {{objectCamel}} := range *{{objectCamel}}s {
 		{{objectCamel}}Map := make(map[string]interface{})
 
-		{{#each flattenProperties as |property|}}
-		{{{property}}}
+		{{#each flattenProperties}}
+		{{{this}}}
 		{{/each}}
 		
 		{{objectCamel}}List = append({{objectCamel}}List, {{objectCamel}}Map)

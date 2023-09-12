@@ -20,6 +20,19 @@ export class ProxyGenerator extends Generator {
 
   // generates the proxy file
   public generate() {
+    if (Generator.skeltonStructure) {
+      console.info(
+        `Creating proxy file structure for ${Generator.globalData.englishName}`
+      );
+      this.generateFile(this.template, this.outputLocation, {
+        skeletonStructure: true,
+      });
+      console.info(
+        `Created proxy file structure for ${Generator.globalData.englishName}`
+      );
+      return;
+    }
+
     console.info(`Creating proxy file for ${Generator.globalData.englishName}`);
     // find the get/read operation
     const getOperation = Generator.config.operations.find(

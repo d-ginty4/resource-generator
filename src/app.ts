@@ -28,18 +28,13 @@ schemaGenerator.generate();
 const proxyGenerator = new ProxyGenerator();
 proxyGenerator.generate();
 
-// // Generate resource file
+// Generate resource file
 const resourceGenerator = new ResourceGenerator();
 resourceGenerator.generate();
 
 // Generate data source file
 const dataSourceGenerator = new DataSourceGenerator();
 dataSourceGenerator.generate();
-
-
-const utilsGenerator = new UtilsGenerator();
-utilsGenerator.generate();
-
 
 // Generate test files
 

@@ -18,6 +18,19 @@ export class ResourceGenerator extends Generator {
 
   // generate the resource file
   public generate() {
+    if (Generator.skeltonStructure) {
+      console.info(
+        `Creating resource file structure for ${Generator.globalData.englishName}`
+      );
+      this.generateFile(this.template, this.outputLocation, {
+        skeletonStructure: true,
+      });
+      console.info(
+        `Created resource file structure for ${Generator.globalData.englishName}`
+      );
+      return;
+    }
+
     console.info(`Creating resource file for ${Generator.globalData.englishName}`);
     const resourceData = {
       readProperties: this.generateReadStatements(),
@@ -27,6 +40,12 @@ export class ResourceGenerator extends Generator {
     console.info(
       `Created resource file for ${Generator.globalData.englishName}`
     );
+
+    if (!Generator.skeltonStructure){
+      // generate the utils file
+      const utilsGenerator = new UtilsGenerator();
+      utilsGenerator.generate();
+    }
   }
 
   // generate the statements needed read the properties of the main object

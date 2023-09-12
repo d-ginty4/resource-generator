@@ -18,6 +18,7 @@ import (
 
 // dataSource{{pascalName}}Read retrieves by name the id in question
 func dataSource{{pascalName}}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	{{#unless skeletonStructure}}
 	sdkConfig := meta.(*gcloud.ProviderMeta).ClientConfig
 	proxy := new{{pascalName}}Proxy(sdkConfig)
 
@@ -37,4 +38,8 @@ func dataSource{{pascalName}}Read(ctx context.Context, d *schema.ResourceData, m
 		d.SetId({{mainObjectCamel}}Id)
 		return nil
 	})
+	{{/unless}}
+	{{#if skeletonStructure}}
+	return nil
+	{{/if}}
 }

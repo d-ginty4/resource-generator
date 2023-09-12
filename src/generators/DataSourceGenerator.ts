@@ -12,6 +12,19 @@ export class DataSourceGenerator extends Generator {
   }
 
   public generate() {
+    if (Generator.skeltonStructure) {
+      console.info(
+        `Creating data source file structure for ${Generator.globalData.englishName}`
+      );
+      this.generateFile(this.template, this.outputLocation, {
+        skeletonStructure: true,
+      });
+      console.info(
+        `Created data source file structure for ${Generator.globalData.englishName}`
+      );
+      return;
+    }
+
     console.info(
       `Creating data source file for ${Generator.globalData.englishName}`
     );
