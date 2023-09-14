@@ -1,5 +1,5 @@
 import {
-  camelToPascal, pascalToCamel,
+  camelToPascal, camelToSnake, pascalToCamel,
 } from "../utils/variableRenames";
 import { Generator } from "./Generator";
 import { SwaggerSchemaProperty } from "../types/Swagger";
@@ -108,7 +108,7 @@ export class ResourceGenerator extends Generator {
     const readPropertyTemplate = templates.get("readProperty")!
     const objectName = pascalToCamel(Generator.config.mainObject);
     const readPropertyData = {
-      property: property,
+      property: camelToSnake(property),
       objectName: objectName,
       objectProperty: camelToPascal(property),
       readFunction: readFunction,

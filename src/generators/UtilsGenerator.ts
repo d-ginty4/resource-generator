@@ -171,7 +171,7 @@ export class UtilsGenerator extends Generator {
           break;
         case "nested object array":
           if (property.items?.$ref) {
-            buildPropertyData.type = "nested objects array";
+            buildPropertyData.type = "nested object array";
             buildPropertyData.nestedObjectFunc = `build${
               property.items.$ref.split("/")[2]
             }s`;
@@ -231,6 +231,7 @@ export class UtilsGenerator extends Generator {
         case "string array":
           break;
         case "nested object array":
+          console.log("nested object array");
           if (property.items?.$ref) {
             const nestedObjectName = property.items.$ref.split("/")[2];
             flattenPropertyData.nestedObjectFunc = `flatten${nestedObjectName}s`;
