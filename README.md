@@ -54,6 +54,19 @@ To create a skeleton structure (boilerplate) for a resource, simple leave the op
 package: outbound_callabletimeset
 mainObject: CallableTimeSet
 ```
+## Helpers
+### Ignore property
+If you wish to ignore a property or properties that is/are part of the main object or any nested objects add the following to the config:
+```yaml
+ignoreProperties:
+  - propertyName1
+  - propertyName2
+```
+For example, responsemanagement libraries has a deprecated property `responseType` that we don't want in the resource. To ignore it we write:
+```yaml
+ignoreProperties:
+  - responseType
+```
 
 ## Project Limitations and need to knows
 * The resource must preform all 5 operation on a resource i.e. create, read, update, destroy and get all

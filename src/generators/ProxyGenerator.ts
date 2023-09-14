@@ -39,10 +39,9 @@ export class ProxyGenerator extends Generator {
       (operation) => operation.type === "read"
     ) || { path: "" };
 
-    // find the go sdk api class name e.g. OutboundApi
-    const resourceApi = `${
-      Generator.swagger.paths[getOperation.path].get.tags[0]
-    }Api`;
+    // create the go sdk api class name e.g. OutboundApi
+    const tag = Generator.swagger.paths[getOperation.path].get.tags[0];
+    const resourceApi = `${tag.replace(/\s+/g, "")}Api`;
 
     if (resourceApi === "Api") {
       throw new Error("Unable to find resource's api");

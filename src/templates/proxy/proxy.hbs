@@ -118,7 +118,7 @@ func getAll{{pascalName}}Fn(ctx context.Context, p *{{camelName}}Proxy) (*[]plat
 	for pageNum := 1; ; pageNum++ {
 		const pageSize = 100
 
-		{{mainObjectCamel}}s, _, err := p.{{apiCamel}}.{{getAllMethod}}(pageSize, pageNum, true, "", "", "", "")
+		{{mainObjectCamel}}s, _, err := p.{{apiCamel}}.{{getAllMethod}}()
 		if err != nil {
 			return nil, fmt.Errorf("Failed to get {{englishName}}: %v", err)
 		}
@@ -150,7 +150,7 @@ func get{{pascalName}}ByIdFn(ctx context.Context, p *{{camelName}}Proxy, id stri
 func get{{pascalName}}IdByNameFn(ctx context.Context, p *{{camelName}}Proxy, name string) (id string, retryable bool, err error) {
 	const pageNum = 1
 	const pageSize = 100
-	{{mainObjectCamel}}s, _, err := p.{{apiCamel}}.{{getAllMethod}}(pageSize, pageNum, true, "", name, "", "")
+	{{mainObjectCamel}}s, _, err := p.{{apiCamel}}.{{getAllMethod}}()
 	if err != nil {
 		return "", false, fmt.Errorf("Error searching {{englishName}} %s: %s", name, err)
 	}

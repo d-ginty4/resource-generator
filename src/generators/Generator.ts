@@ -56,20 +56,29 @@ export abstract class Generator {
     if (!Generator.globalData) {
       Generator.globalData = this.setGlobalData();
     }
-    if (!Generator.nestedObjects) {
-      Generator.nestedObjects = this.setNestedObjects();
-    }
     if (!Generator.ignorableProperties) {
-      Generator.ignorableProperties = [
+      const properties: string[] = [
         "id",
         "dateCreated",
         "dateModified",
         "version",
+        "createdBy",
         "selfUri",
       ];
+      if (Generator.config.ignoreProperties) {
+      Generator.ignorableProperties = [...Generator.config.ignoreProperties, ...properties]
+      }
+      else {
+        Generator.ignorableProperties = properties;
+      }
+
+      // I don't know I put this here but its staying here for now
       handlebars.registerHelper("eq", function (a, b) {
         return a === b;
       });
+    }
+    if (!Generator.nestedObjects) {
+      Generator.nestedObjects = this.setNestedObjects();
     }
     if (!Generator.basicTypes) {
       Generator.basicTypes = ["string", "integer", "boolean"];
@@ -117,13 +126,17 @@ export abstract class Generator {
   private setNestedObjects(): string[] {
     const definitions: Definitions = Generator.swagger.definitions;
     const objectNames: Set<string> = new Set(); // A set prevents duplicated objects being added
+    const that = this;
 
     function findObjects(obj: SwaggerSchema) {
       const properties = obj.properties;
       // Check if there's properties
       if (properties) {
         // Loop through every property
-        for (const property of Object.values(properties)) {
+        for (const [propertyName, property] of Object.entries(properties)) {
+          if(that.isIgnorableProperty(propertyName)) {
+            continue;
+          }
           // Handle nested object
           if (property.$ref) {
             const objectName = property.$ref.split("/")[2];

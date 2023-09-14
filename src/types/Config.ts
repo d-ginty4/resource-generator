@@ -2,6 +2,7 @@ export interface Config {
   package: string;
   mainObject: string;
   operations: Operation[];
+  ignoreProperties?: string[];
   testFiles?: boolean;
   documentation?: boolean;
 }
