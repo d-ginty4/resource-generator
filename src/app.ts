@@ -10,7 +10,6 @@ import { SchemaGenerator } from "./generators/SchemaGenerator";
 import { ProxyGenerator } from "./generators/ProxyGenerator";
 import { ResourceGenerator } from "./generators/ResourceGenerator";
 import { DataSourceGenerator } from "./generators/DataSourceGenerator"; 
-import { UtilsGenerator } from "./generators/UtilsGenerator";
 
 // Read config file
 const yamlFileContent = fs.readFileSync("config.yml", "utf-8");
@@ -21,24 +20,20 @@ createFolderIfNotExists("output");
 createFolderIfNotExists(`output/${config.package}`);
 
 // Generate schema file
-// const schemaGenerator = new SchemaGenerator();
-// schemaGenerator.generate();
+const schemaGenerator = new SchemaGenerator();
+schemaGenerator.generate();
 
 // Generate proxy file
-// const proxyGenerator = new ProxyGenerator();
-// proxyGenerator.generate();
+const proxyGenerator = new ProxyGenerator();
+proxyGenerator.generate();
 
 // Generate resource file
 const resourceGenerator = new ResourceGenerator();
 resourceGenerator.generate();
 
 // Generate data source file
-// const dataSourceGenerator = new DataSourceGenerator();
-// dataSourceGenerator.generate();
-
-// Generate test files
-
-// Generate docs
+const dataSourceGenerator = new DataSourceGenerator();
+dataSourceGenerator.generate();
 
 function createFolderIfNotExists(folderPath: string) {
   try {

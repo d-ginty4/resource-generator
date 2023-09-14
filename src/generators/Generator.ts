@@ -46,6 +46,8 @@ export abstract class Generator {
       if (!Generator.config.operations) {
         console.info("No operations given, generating skeleton structure");
         Generator.skeltonStructure = true;
+      } else if (Generator.config.operations.length !== 5){
+        throw new Error("There must be 5 operations. Create, Read, Update, Delete and Get all");
       }
     }
     if (!Generator.swagger) {
