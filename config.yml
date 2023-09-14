@@ -1,6 +1,5 @@
-# This config file contains the information needed to create a resource
 package: outbound_callabletimeset
-rootObject: CallableTimeSet
+mainObject: CallableTimeSet
 operations:
   - type: create
     method: POST

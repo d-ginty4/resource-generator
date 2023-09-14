@@ -20,6 +20,13 @@ export function camelToPascal(camelCaseString: string): string {
   return camelCaseString.charAt(0).toUpperCase() + camelCaseString.slice(1);
 }
 
+export function camelToSnake(camelCaseString: string): string {
+  return camelCaseString.replace(
+    /[A-Z]/g,
+    (letter) => `_${letter.toLowerCase()}`
+  );
+}
+
 export function pascalToCamel(pascalCaseString: string): string {
   return pascalCaseString.charAt(0).toLowerCase() + pascalCaseString.slice(1);
 }
@@ -27,11 +34,4 @@ export function pascalToCamel(pascalCaseString: string): string {
 export function goSdkName(name: string): string {
   const lowerCase = name.toLowerCase();
   return lowerCase.charAt(0).toUpperCase() + lowerCase.slice(1);
-}
-
-export function camelToSnake(camelCaseString: string): string {
-  return camelCaseString.replace(
-    /[A-Z]/g,
-    (letter) => `_${letter.toLowerCase()}`
-  );
 }

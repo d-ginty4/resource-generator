@@ -1,3 +1,4 @@
+import templates from "../utils/templates";
 import { Generator } from "./Generator";
 
 export class DataSourceGenerator extends Generator {
@@ -6,13 +7,30 @@ export class DataSourceGenerator extends Generator {
 
   constructor() {
     super();
-    this.template = "src/templates/dataSource.mustache";
-    this.outputLocation = `output/${this.config.package}/dataSource.go`;
+    this.template = templates.get("dataSource")!;
+    this.outputLocation = this.getOutputLocation("dataSource");
   }
 
   public generate() {
-    const dataSourceData = {};
+    if (Generator.skeltonStructure) {
+      console.info(
+        `Creating data source file structure for ${Generator.globalData.englishName}`
+      );
+      this.generateFile(this.template, this.outputLocation, {
+        skeletonStructure: true,
+      });
+      console.info(
+        `Created data source file structure for ${Generator.globalData.englishName}`
+      );
+      return;
+    }
 
-    this.generateFile(this.template, dataSourceData, this.outputLocation);
+    console.info(
+      `Creating data source file for ${Generator.globalData.englishName}`
+    );
+    this.generateFile(this.template, this.outputLocation);
+    console.info(
+      `Created data source file for ${Generator.globalData.englishName}`
+    );
   }
 }

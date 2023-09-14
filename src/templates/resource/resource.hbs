@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/mypurecloud/platform-client-sdk-go/v105/platformclientv2"
 )
 
@@ -25,6 +26,9 @@ The resource_genesyscloud_{{snakeName}}.go contains all of the methods that perf
 
 // getAllAuth{{pascalName}} retrieves all of the {{englishName}} via Terraform in the Genesys Cloud and is used for the exporter
 func getAllAuth{{pascalName}}s(ctx context.Context, clientConfig *platformclientv2.Configuration) (resourceExporter.ResourceIDMetaMap, diag.Diagnostics) {
+	{{#if skeletonStructure}}
+	return nil, nil
+	{{else}}
 	proxy := new{{pascalName}}Proxy(clientConfig)
 	resources := make(resourceExporter.ResourceIDMetaMap)
 
@@ -39,13 +43,17 @@ func getAllAuth{{pascalName}}s(ctx context.Context, clientConfig *platformclient
 	}
 
 	return resources, nil
+	{{/if}}
 }
 
 // create{{pascalName}} is used by the {{snakeName}} resource to create Genesys cloud {{englishName}}
 func create{{pascalName}}(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	{{#if skeletonStructure}}
+	return nil
+	{{else}}
 	sdkConfig := meta.(*gcloud.ProviderMeta).ClientConfig
 	proxy := new{{pascalName}}Proxy(sdkConfig)
-
+	
 	{{camelName}} := get{{pascalName}}FromResourceData(d)
 
 	{{mainObjectCamel}}, err := proxy.create{{pascalName}}(ctx, &{{camelName}})
@@ -56,40 +64,50 @@ func create{{pascalName}}(ctx context.Context, d *schema.ResourceData, meta inte
 	d.SetId(*{{mainObjectCamel}}.Id)
 	log.Printf("Created {{englishName}} %s", *{{mainObjectCamel}}.Id)
 	return read{{pascalName}}(ctx, d, meta)
+	{{/if}}
 }
 
 // read{{pascalName}} is used by the {{snakeName}} resource to read an {{englishName}} from genesys cloud
 func read{{pascalName}}(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	{{#if skeletonStructure}}
+	return nil
+	{{else}}
 	sdkConfig := meta.(*gcloud.ProviderMeta).ClientConfig
 	proxy := new{{pascalName}}Proxy(sdkConfig)
 
 	log.Printf("Reading {{englishName}} %s", d.Id())
 
-	return gcloud.WithRetriesForRead(ctx, d, func() *resource.RetryError {
+	return gcloud.WithRetriesForRead(ctx, d, func() *retry.RetryError {
 		{{mainObjectCamel}}, respCode, getErr := proxy.get{{pascalName}}ById(ctx, d.Id())
 		if getErr != nil {
 			if gcloud.IsStatus404ByInt(respCode) {
-				return resource.RetryableError(fmt.Errorf("Failed to read {{englishName}} %s: %s", d.Id(), getErr))
+				return retry.RetryableError(fmt.Errorf("Failed to read {{englishName}} %s: %s", d.Id(), getErr))
 			}
-			return resource.NonRetryableError(fmt.Errorf("Failed to read {{englishName}} %s: %s", d.Id(), getErr))
+			return retry.NonRetryableError(fmt.Errorf("Failed to read {{englishName}} %s: %s", d.Id(), getErr))
 		}
 
 		cc := consistency_checker.NewConsistencyCheck(ctx, d, meta, Resource{{pascalName}}())
 
-		{{#readProperties}}
-		{{{.}}}
-		{{/readProperties}}
+		{{#if readProperties}}
+			{{#each readProperties as |readProperty|}}
+				{{{readProperty}}}
+			{{/each}}
+		{{/if}}
+		
 
 		log.Printf("Read {{englishName}} %s %s", d.Id(), *{{mainObjectCamel}}.Name)
 		return cc.CheckState()
 	})
+	{{/if}}
 }
 
 // update{{pascalName}} is used by the {{snakeName}} resource to update an {{englishName}} in Genesys Cloud
 func update{{pascalName}}(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	{{#if skeletonStructure}}
+	return nil
+	{{else}}
 	sdkConfig := meta.(*gcloud.ProviderMeta).ClientConfig
 	proxy := new{{pascalName}}Proxy(sdkConfig)
-
 	{{camelName}} := get{{pascalName}}FromResourceData(d)
 
 	{{mainObjectCamel}}, err := proxy.update{{pascalName}}(ctx, d.Id(), &{{camelName}})
@@ -99,29 +117,34 @@ func update{{pascalName}}(ctx context.Context, d *schema.ResourceData, meta inte
 
 	log.Printf("Updated {{englishName}} %s", *{{mainObjectCamel}}.Id)
 	return read{{pascalName}}(ctx, d, meta)
+	{{/if}}
 }
 
 // delete{{pascalName}} is used by the {{snakeName}} resource to delete an {{englishName}} from Genesys cloud
 func delete{{pascalName}}(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	{{#if skeletonStructure}}
+	return nil
+	{{else}}
 	sdkConfig := meta.(*gcloud.ProviderMeta).ClientConfig
 	proxy := new{{pascalName}}Proxy(sdkConfig)
-
+	
 	_, err := proxy.delete{{pascalName}}(ctx, d.Id())
 	if err != nil {
 		return diag.Errorf("Failed to delete {{englishName}} %s: %s", d.Id(), err)
 	}
 
-	return gcloud.WithRetries(ctx, 180*time.Second, func() *resource.RetryError {
+	return gcloud.WithRetries(ctx, 180*time.Second, func() *retry.RetryError {
 		_, respCode, err := proxy.get{{pascalName}}ById(ctx, d.Id())
 
 		if err == nil {
-			return resource.NonRetryableError(fmt.Errorf("Error deleting {{englishName}} %s: %s", d.Id(), err))
-		}
-		if gcloud.IsStatus404ByInt(respCode) {
-			log.Printf("Deleted {{englishName}} %s", d.Id())
-			return nil
+			if gcloud.IsStatus404ByInt(respCode) {
+				log.Printf("Deleted {{englishName}} %s", d.Id())
+				return nil
+			}
+			return retry.NonRetryableError(fmt.Errorf("Error deleting {{englishName}} %s: %s", d.Id(), err))
 		}
 
-		return resource.RetryableError(fmt.Errorf("{{englishName}} %s still exists", d.Id()))
+		return retry.RetryableError(fmt.Errorf("{{englishName}} %s still exists", d.Id()))
 	})
+	{{/if}}
 }

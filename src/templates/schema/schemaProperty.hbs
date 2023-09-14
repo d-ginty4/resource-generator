@@ -1,0 +1,8 @@
+"{{name}}": {
+    Description: "{{{description}}}",{{#if required}}
+    Required:    true,{{else}}
+    Optional:    true,{{/if}}
+    Type:        {{type}},{{#if singleItem}}
+    MaxItems:    1{{/if}}{{#if element}}
+    Elem:        {{element}}{{/if}}
+},

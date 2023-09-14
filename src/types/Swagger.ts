@@ -111,8 +111,10 @@ export interface SwaggerSchemaProperty {
   description?: string;
   enum?: string[];
   items?: {
-    $ref: string
-  }
+    $ref?: string;
+    type?: string
+  };
+  $ref?: string;
 }
 
 

@@ -18,16 +18,19 @@ out during testing.
 var internalProxy *{{camelName}}Proxy
 
 // Type definitions for each func on our proxy so we can easily mock them out later
+{{#unless skeletonStructure}}
 type create{{pascalName}}Func func(ctx context.Context, p *{{camelName}}Proxy, {{mainObjectCamel}} *platformclientv2.{{mainObjectGoSDK}}) (*platformclientv2.{{mainObjectGoSDK}}, error)
 type getAll{{pascalName}}Func func(ctx context.Context, p *{{camelName}}Proxy) (*[]platformclientv2.{{mainObjectGoSDK}}, error)
 type get{{pascalName}}ByIdFunc func(ctx context.Context, p *{{camelName}}Proxy, id string) ({{mainObjectCamel}} *platformclientv2.{{mainObjectGoSDK}}, responseCode int, err error)
 type get{{pascalName}}IdByNameFunc func(ctx context.Context, p *{{camelName}}Proxy, name string) (id string, retryable bool, err error)
 type update{{pascalName}}Func func(ctx context.Context, p *{{camelName}}Proxy, id string, {{mainObjectCamel}} *platformclientv2.{{mainObjectGoSDK}}) (*platformclientv2.{{mainObjectGoSDK}}, error)
 type delete{{pascalName}}Func func(ctx context.Context, p *{{camelName}}Proxy, id string) (responseCode int, err error)
+{{/unless}}
 
 // {{camelName}}Proxy contains all of the methods that call genesys cloud APIs.
 type {{camelName}}Proxy struct {
 	clientConfig                  *platformclientv2.Configuration
+	{{#unless skeletonStructure}}
 	{{apiCamel}}                  *platformclientv2.{{api}}
 	create{{pascalName}}Attr      create{{pascalName}}Func
 	getAll{{pascalName}}Attr      getAll{{pascalName}}Func
@@ -35,20 +38,25 @@ type {{camelName}}Proxy struct {
 	get{{pascalName}}IdByNameAttr get{{pascalName}}IdByNameFunc
 	update{{pascalName}}Attr      update{{pascalName}}Func
 	delete{{pascalName}}Attr      delete{{pascalName}}Func
+	{{/unless}}
 }
 
 // new{{pascalName}}Proxy initializes the {{englishName}} proxy with all of the data needed to communicate with Genesys Cloud
 func new{{pascalName}}Proxy(clientConfig *platformclientv2.Configuration) *{{camelName}}Proxy {
+	{{#unless skeletonStructure}}
 	api := platformclientv2.New{{api}}WithConfig(clientConfig)
+	{{/unless}}
 	return &{{camelName}}Proxy{
 		clientConfig:                   clientConfig,
-		{{apiCamel}}:                    	api,
+		{{#unless skeletonStructure}}
+		{{apiCamel}}:                   api,
 		create{{pascalName}}Attr:       create{{pascalName}}Fn,
 		getAll{{pascalName}}Attr:       getAll{{pascalName}}Fn,
 		get{{pascalName}}ByIdAttr:     	get{{pascalName}}ByIdFn,
 		get{{pascalName}}IdByNameAttr: 	get{{pascalName}}IdByNameFn,
 		update{{pascalName}}Attr:      	update{{pascalName}}Fn,
 		delete{{pascalName}}Attr:      	delete{{pascalName}}Fn,
+		{{/unless}}
 	} 
 }
 
@@ -62,6 +70,7 @@ func get{{pascalName}}Proxy(clientConfig *platformclientv2.Configuration) *{{cam
 	return internalProxy
 }
 
+{{#unless skeletonStructure}}
 // create{{pascalName}} creates a Genesys Cloud {{englishName}}
 func (p *{{camelName}}Proxy) create{{pascalName}}(ctx context.Context, {{camelName}} *platformclientv2.{{mainObjectGoSDK}}) (*platformclientv2.{{mainObjectGoSDK}}, error) {
 	return p.create{{pascalName}}Attr(ctx, p, {{camelName}})
@@ -183,3 +192,4 @@ func delete{{pascalName}}Fn(ctx context.Context, p *{{camelName}}Proxy, id strin
 
 	return resp.StatusCode, nil
 }
+{{/unless}}
