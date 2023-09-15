@@ -16,5 +16,4 @@ operations:
   - type: getAll
     method: GET
     path: /api/v2/responsemanagement/libraries
-ignoreProperties:
-  - responseType
+skeletonSchemaFile: true;

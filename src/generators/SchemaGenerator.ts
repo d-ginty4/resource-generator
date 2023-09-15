@@ -26,6 +26,19 @@ export class SchemaGenerator extends Generator {
 
   // generates the terraform schema file
   public generate() {
+    if (Generator.skeltonStructure || Generator.config.skeletonSchemaFile) {
+      console.info(
+        `Creating schema file structure for ${Generator.globalData.englishName}`
+      );
+      this.generateFile(this.template, this.outputLocation, {
+        skeletonStructure: true,
+      });
+      console.info(
+        `Created schema file structure for ${Generator.globalData.englishName}`
+      );
+      return;
+    }
+
     console.info(`Creating schema file for ${Generator.config.mainObject}`);
     const schemaData = {
       properties: this.createProperties(Generator.mainObject),

@@ -73,6 +73,7 @@ ignoreProperties:
 ### Skeleton files
 If you wish you create a full resource but with a 1 or 2 skeleton files, you can add one of the following to the config.yml:
 ```yaml
+skeletonSchemaFile: true;
 skeletonResourceFile: true;
 skeletonProxyFile: true;
 skeletonDataSourceFile: true;

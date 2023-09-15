@@ -27,9 +27,11 @@ func SetRegistrar(regInstance registrar.Registrar) {
 
 // Resource{{pascalName}} registers the genesyscloud_{{snakeName}} resource with Terraform
 func Resource{{pascalName}}() *schema.Resource {
+	{{#unless skeletonStructure}}
 	{{#each nestedObjectSchemas as |schema|}}
 		{{{schema}}}
 	{{/each}}
+	{{/unless}}
 	
 	return &schema.Resource{
 		Description: `Genesys Cloud {{englishName}}`,
@@ -43,11 +45,13 @@ func Resource{{pascalName}}() *schema.Resource {
 		},
 		SchemaVersion: 1,
 		Schema: map[string]*schema.Schema{
+			{{#unless skeletonStructure}}
 			{{#if properties}}
 				{{#each properties as |property|}}
 					{{{property}}}
 				{{/each}}
 			{{/if}}
+			{{/unless}}
 		},
 	}
 }																																																											
