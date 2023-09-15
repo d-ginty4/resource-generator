@@ -17,6 +17,7 @@ For the best results, we recommend having *Go* installed locally to allow the ou
 The content of the `config.yml` will dictate how much or how little code is generated. This resource generator is able to create:
   * A full resource (all files with necessary logic)
   * A skeleton structure for a resource (all files created with most functions and no logic)
+  * Test files (init test, resource test and data source test files)
 
 Config File properties:
   * package: The package name for the resource. This name is also be used for the name of the resource and in the resource file names.
@@ -54,7 +55,16 @@ To create a skeleton structure (boilerplate) for a resource, simple leave the op
 package: outbound_callabletimeset
 mainObject: CallableTimeSet
 ```
-## Helpers
+
+### Test files
+To generate a skeleton test files, add the following to the config.yml:
+```yaml
+testFiles: true # Generate resource and data source test files
+initTest: true # Generate init test file 
+```
+The resource generator will only create **boilerplate test files**, they will contain no logic.  
+
+## Generation Controllers
 ### Ignore property
 If you wish to ignore a property or properties that is/are part of the main object or any nested objects add the following to the config:
 ```yaml

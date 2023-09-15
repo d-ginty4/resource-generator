@@ -3,6 +3,7 @@ export interface Config {
   mainObject: string;
   operations: Operation[];
   ignoreProperties?: string[];
+  initTest?: boolean;
   testFiles?: boolean;
   documentation?: boolean;
   skeletonSchemaFile?: boolean;

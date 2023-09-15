@@ -27,6 +27,9 @@ templates.set("flattenProperty", "src/templates/utils/flattenProperty.hbs");
 templates.set("dataSource", "src/templates/dataSource/dataSource.hbs");
 
 // test templates
+templates.set("resourceTest", "src/templates/tests/resourceTest.hbs");
+templates.set("dataSourceTest", "src/templates/tests/dataSourceTest.hbs");
+templates.set("initTest", "src/templates/tests/initTest.hbs");
 
 // documentation templates
 

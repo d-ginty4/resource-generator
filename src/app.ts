@@ -10,6 +10,7 @@ import { SchemaGenerator } from "./generators/SchemaGenerator";
 import { ProxyGenerator } from "./generators/ProxyGenerator";
 import { ResourceGenerator } from "./generators/ResourceGenerator";
 import { DataSourceGenerator } from "./generators/DataSourceGenerator"; 
+import { TestGenerator } from "./generators/TestGenerator";
 
 // Read config file
 const yamlFileContent = fs.readFileSync("config.yml", "utf-8");
@@ -34,6 +35,10 @@ resourceGenerator.generate();
 // Generate data source file
 const dataSourceGenerator = new DataSourceGenerator();
 dataSourceGenerator.generate();
+
+// Generate test files
+const testGenerator = new TestGenerator(config.testFiles, config.initTest);
+testGenerator.generate();
 
 function createFolderIfNotExists(folderPath: string) {
   try {

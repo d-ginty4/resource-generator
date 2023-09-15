@@ -288,6 +288,12 @@ export abstract class Generator {
         return `output/${packageName}/resource_genesyscloud_${packageName}_utils.go`;
       case "dataSource":
         return `output/${packageName}/data_source_genesyscloud_${packageName}.go`;
+      case "initTest":
+        return `output/${packageName}/genesyscloud_${packageName}_init_test.go`;
+      case "dataSourceTest":
+        return `output/${packageName}/data_source_genesyscloud_${packageName}_test.go`;
+      case "resourceTest":
+        return `output/${packageName}/resource_genesyscloud_${packageName}_test.go`;
       default:
         throw new Error(`Unknown file type ${fileType}`);
     }

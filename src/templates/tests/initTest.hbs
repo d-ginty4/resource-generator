@@ -1,4 +1,4 @@
-package outbound_ruleset
+package {{snakeName}}
 
 import (
 	"sync"
@@ -7,12 +7,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	gcloud "terraform-provider-genesyscloud/genesyscloud"
-	obContactList "terraform-provider-genesyscloud/genesyscloud/outbound_contact_list"
 )
 
 /*
-   The genesyscloud_outbound_ruleset_init_test.go file is used to initialize the data sources and resources
-   used in testing the outbound_ruleset resource.
+   The genesyscloud_{{snakeName}}_init_test.go file is used to initialize the data sources and resources
+   used in testing the {{snakeName}} resource.
 */
 
 // providerDataSources holds a map of all registered datasources
@@ -29,14 +28,14 @@ type registerTestInstance struct{
 
 // registerTestResources registers all resources used in the tests
 func (r *registerTestInstance) registerTestResources() {
-	providerResources["genesyscloud_outbound_ruleset"] = ResourceOutboundRuleset()
-	providerResources["genesyscloud_routing_queue"] =  gcloud.ResourceRoutingQueue()
+	providerResources["genesyscloud_{{snakeName}}"] = Resource{{pascalName}}()
+	// TODO: Add references
 }
 
 // registerTestDataSources registers all data sources used in the tests.
 func (r *registerTestInstance) registerTestDataSources() {
-	providerDataSources["genesyscloud_outbound_ruleset"] =  DataSourceOutboundRuleset()
-	providerResources["genesyscloud_outbound_contact_list"] = obContactList.ResourceOutboundContactList()
+	providerDataSources["genesyscloud_{{snakeName}}"] =  DataSource{{pascalName}}()
+	// TODO: Add references
 }
 
 // initTestresources initializes all test resources and data sources.
@@ -52,9 +51,9 @@ func initTestresources() {
 
 // TestMain is a "setup" function called by the testing framework when run the test
 func TestMain(m *testing.M) {
-	// Run setup function before starting the test suite for the outbound_ruleset package
+	// Run setup function before starting the test suite for the {{snakeName}} package
 	initTestresources()
 
-	// Run the test suite for the outbound_ruleset package
+	// Run the test suite for the {{snakeName}} package
 	m.Run()
 }
