@@ -12,7 +12,7 @@ export class DataSourceGenerator extends Generator {
   }
 
   public generate() {
-    if (Generator.skeltonStructure) {
+    if (Generator.skeltonStructure || Generator.config.skeletonDataSourceFile) {
       console.info(
         `Creating data source file structure for ${Generator.globalData.englishName}`
       );

@@ -62,11 +62,22 @@ ignoreProperties:
   - propertyName1
   - propertyName2
 ```
+Please note that all properties with that name will not used by the resource.
+
 For example, responsemanagement libraries has a deprecated property `responseType` that we don't want in the resource. To ignore it we write:
 ```yaml
 ignoreProperties:
   - responseType
 ```
+
+### Skeleton files
+If you wish you create a full resource but with a 1 or 2 skeleton files, you can add one of the following to the config.yml:
+```yaml
+skeletonResourceFile: true;
+skeletonProxyFile: true;
+skeletonDataSourceFile: true;
+```
+If only creating a skeleton file, you will still need to include the operations.
 
 ## Project Limitations and need to knows
 * The resource must preform all 5 operation on a resource i.e. create, read, update, destroy and get all

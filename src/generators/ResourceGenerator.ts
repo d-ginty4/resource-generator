@@ -18,7 +18,7 @@ export class ResourceGenerator extends Generator {
 
   // generate the resource file
   public generate() {
-    if (Generator.skeltonStructure) {
+    if (Generator.skeltonStructure || Generator.config.skeletonResourceFile) {
       console.info(
         `Creating resource file structure for ${Generator.globalData.englishName}`
       );
@@ -41,7 +41,7 @@ export class ResourceGenerator extends Generator {
       `Created resource file for ${Generator.globalData.englishName}`
     );
 
-    if (!Generator.skeltonStructure){
+    if (!Generator.skeltonStructure || !Generator.config.skeletonResourceFile) {
       // generate the utils file
       const utilsGenerator = new UtilsGenerator();
       utilsGenerator.generate();

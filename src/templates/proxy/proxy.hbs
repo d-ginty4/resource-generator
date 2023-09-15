@@ -1,10 +1,11 @@
 package {{snakeName}}
 
 import (
+	{{#unless skeletonStructure}}
 	"context"
 	"fmt"
 	"log"
-
+	{{/unless}}
 	"github.com/mypurecloud/platform-client-sdk-go/v105/platformclientv2"
 )
 
@@ -113,7 +114,7 @@ func create{{pascalName}}Fn(ctx context.Context, p *{{camelName}}Proxy, {{camelN
 
 // getAll{{pascalName}}Fn is the implementation for retrieving all {{englishName}} in Genesys Cloud
 func getAll{{pascalName}}Fn(ctx context.Context, p *{{camelName}}Proxy) (*[]platformclientv2.{{mainObjectGoSDK}}, error) {
-	var all{{mainObjectPascal}}s []platformclientv2.{{mainObjectGoSDK}}
+	var all{{mainObject}}s []platformclientv2.{{mainObjectGoSDK}}
 
 	for pageNum := 1; ; pageNum++ {
 		const pageSize = 100
@@ -129,18 +130,18 @@ func getAll{{pascalName}}Fn(ctx context.Context, p *{{camelName}}Proxy) (*[]plat
 
 		for _, {{mainObjectCamel}} := range *{{mainObjectCamel}}s.Entities {
 			log.Printf("Dealing with {{mainObjectCamel}} id : %s", *{{mainObjectCamel}}.Id)
-			all{{mainObjectPascal}}s = append(all{{mainObjectPascal}}s, {{mainObjectCamel}})
+			all{{mainObject}}s = append(all{{mainObject}}s, {{mainObjectCamel}})
 		}
 	}
 
-	return &all{{mainObjectPascal}}s, nil
+	return &all{{mainObject}}s, nil
 }
 
 // get{{pascalName}}ByIdFn is an implementation of the function to get a Genesys Cloud {{englishName}} by Id
 func get{{pascalName}}ByIdFn(ctx context.Context, p *{{camelName}}Proxy, id string) ({{camelName}} *platformclientv2.{{mainObjectGoSDK}}, statusCode int, err error) {
 	{{mainObjectCamel}}, resp, err := p.{{apiCamel}}.{{readMethod}}(id)
 	if err != nil {
-		
+		return nil, resp.StatusCode, fmt.Errorf("Failed to retrieve {{englishName}} by id %s: %s", id, err)
 	}
 
 	return {{mainObjectCamel}}, resp.StatusCode, nil

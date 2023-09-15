@@ -5,6 +5,9 @@ export interface Config {
   ignoreProperties?: string[];
   testFiles?: boolean;
   documentation?: boolean;
+  skeletonResourceFile?: boolean;
+  skeletonProxyFile?: boolean;
+  skeletonDataSourceFile?: boolean;
 }
 
 export interface Operation {

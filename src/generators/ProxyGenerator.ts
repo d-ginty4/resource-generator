@@ -20,7 +20,7 @@ export class ProxyGenerator extends Generator {
 
   // generates the proxy file
   public generate() {
-    if (Generator.skeltonStructure) {
+    if (Generator.skeltonStructure || Generator.config.skeletonProxyFile) {
       console.info(
         `Creating proxy file structure for ${Generator.globalData.englishName}`
       );
