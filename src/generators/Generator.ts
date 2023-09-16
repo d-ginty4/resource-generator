@@ -1,7 +1,6 @@
 // packages
 import * as yaml from "js-yaml";
 import * as fs from "fs";
-import * as handlebars from "handlebars";
 
 // types
 import { Config } from "../types/Config";
@@ -23,10 +22,6 @@ import {
 } from "../utils/variableRenames";
 
 export abstract class Generator {
-  // abstract properties
-  abstract template: string;
-  abstract outputLocation: string;
-
   // protected properties
   protected static config: Config;
   protected static swagger: Swagger;
@@ -36,66 +31,51 @@ export abstract class Generator {
   protected static skeltonStructure: boolean;
 
   // private properties
-  private static ignorableProperties: string[];
-  private static basicTypes: string[];
+  private ignorableProperties: string[] = [];
+  private basicTypes: string[];
 
   constructor() {
-    // Avoid resetting data if it's already set
-    if (!Generator.config) {
-      Generator.config = this.setConfig();
-      if (!Generator.config.operations) {
-        console.info("No operations given, generating skeleton structure");
-        Generator.skeltonStructure = true;
-      } else if (Generator.config.operations.length !== 5){
-        throw new Error("There must be 5 operations. Create, Read, Update, Delete and Get all");
-      }
+    Generator.config = this.setConfig();
+    if (!Generator.config.operations) {
+      console.info("No operations given, generating skeleton structure");
+      Generator.skeltonStructure = true;
+    } else if (Generator.config.operations.length !== 5) {
+      throw new Error(
+        "There must be 5 operations. Create, Read, Update, Delete and Get all"
+      );
     }
-    if (!Generator.swagger) {
-      Generator.swagger = this.setSwagger();
-    }
-    if (!Generator.globalData) {
-      Generator.globalData = this.setGlobalData();
-    }
-    if (!Generator.ignorableProperties) {
-      const properties: string[] = [
-        "id",
-        "dateCreated",
-        "dateModified",
-        "version",
-        "createdBy",
-        "selfUri",
+
+    Generator.swagger = this.setSwagger();
+    Generator.globalData = this.setGlobalData();
+    Generator.nestedObjects = this.setNestedObjects();
+    this.basicTypes = ["string", "integer", "boolean"];
+
+    const properties: string[] = [
+      "id",
+      "dateCreated",
+      "dateModified",
+      "version",
+      "createdBy",
+      "selfUri",
+    ];
+    if (Generator.config.ignoreProperties) {
+      this.ignorableProperties = [
+        ...Generator.config.ignoreProperties,
+        ...properties,
       ];
-      if (Generator.config.ignoreProperties) {
-      Generator.ignorableProperties = [...Generator.config.ignoreProperties, ...properties]
-      }
-      else {
-        Generator.ignorableProperties = properties;
-      }
+    } else {
+      this.ignorableProperties = properties;
+    }
 
-      // I don't know I put this here but its staying here for now
-      handlebars.registerHelper("eq", function (a, b) {
-        return a === b;
-      });
-    }
-    if (!Generator.nestedObjects) {
-      Generator.nestedObjects = this.setNestedObjects();
-    }
-    if (!Generator.basicTypes) {
-      Generator.basicTypes = ["string", "integer", "boolean"];
-    }
+    Generator.mainObject =
+      Generator.swagger.definitions[Generator.config.mainObject];
     if (!Generator.mainObject) {
-      Generator.mainObject =
-        Generator.swagger.definitions[Generator.config.mainObject];
-
-      if (!Generator.mainObject) {
-        throw new Error(
-          `The main object ${Generator.config.mainObject} does not exist in the swagger file`
-        );
-      }
+      throw new Error(
+        `The main object ${Generator.config.mainObject} does not exist in the swagger file`
+      );
     }
   }
 
-  // setters
   private setConfig(): Config {
     const yamlFileContent = fs.readFileSync("config.yml", "utf-8");
     const data: Config = yaml.load(yamlFileContent) as Config;
@@ -134,7 +114,7 @@ export abstract class Generator {
       if (properties) {
         // Loop through every property
         for (const [propertyName, property] of Object.entries(properties)) {
-          if(that.isIgnorableProperty(propertyName)) {
+          if (that.isIgnorableProperty(propertyName)) {
             continue;
           }
           // Handle nested object
@@ -166,11 +146,11 @@ export abstract class Generator {
 
   // helpers
   protected isIgnorableProperty(propertyName: string): boolean {
-    return Generator.ignorableProperties.includes(propertyName);
+    return this.ignorableProperties.includes(propertyName);
   }
 
   protected isBasicType(type: string): boolean {
-    return Generator.basicTypes.includes(type);
+    return this.basicTypes.includes(type);
   }
 
   protected hasNestedObject(): boolean {
@@ -208,94 +188,6 @@ export abstract class Generator {
       }
     } else {
       throw new Error(`Unknown property ${name}: ${property}`);
-    }
-  }
-
-  /**
-   * Generate a file using a template and data
-   * @param template file template location
-   * @param destination the destination of the output file
-   * @param data the data to be used by the template
-   */
-  protected generateFile(
-    templateFile: string,
-    destination: string,
-    data?: object
-  ) {
-    // check if the template file exists
-    try {
-      fs.accessSync(templateFile, fs.constants.R_OK);
-    } catch (err) {
-      throw new Error(`Template file ${templateFile} does not exist`);
-    }
-    // read the template file
-    const templateText = fs.readFileSync(templateFile, "utf-8");
-
-    // Compile the template
-    const template = handlebars.compile(templateText);
-
-    // combine the global data and the data passed in
-    const  allData = { ...Generator.globalData, ...data };
-    
-    // generate the file from the template and data
-    const output = template(allData);
-
-    // Save the generated output to a file
-    fs.writeFileSync(destination, output, "utf-8");
-  }
-
-  /**
-   * This function will generate a template and return the content as a string
-   * @param template file template location
-   * @param data the data to be used by the template
-   */
-  protected generateTemplateStr(
-    templateLocation: string,
-    data: object
-  ): string {
-    // check if the template file exists
-    try {
-      fs.accessSync(templateLocation, fs.constants.R_OK);
-    } catch (err) {
-      throw new Error(`Template file ${templateLocation} does not exist`);
-    }
-    // read the template file
-    const templateText = fs.readFileSync(templateLocation, "utf-8");
-
-    // Compile the template
-    const template = handlebars.compile(templateText);
-
-    // generate the template
-    const output = template(data);
-
-    return output;
-  }
-
-  /**
-   * Return the output location of a file type e.g. schema file
-   * @param fileType file type e.g. schema
-   */
-  protected getOutputLocation(fileType: string): string {
-    const packageName = Generator.config.package;
-    switch (fileType) {
-      case "schema":
-        return `output/${packageName}/resource_genesyscloud_${packageName}_schema.go`;
-      case "proxy":
-        return `output/${packageName}/genesyscloud_${packageName}_proxy.go`;
-      case "resource":
-        return `output/${packageName}/resource_genesyscloud_${packageName}.go`;
-      case "utils":
-        return `output/${packageName}/resource_genesyscloud_${packageName}_utils.go`;
-      case "dataSource":
-        return `output/${packageName}/data_source_genesyscloud_${packageName}.go`;
-      case "initTest":
-        return `output/${packageName}/genesyscloud_${packageName}_init_test.go`;
-      case "dataSourceTest":
-        return `output/${packageName}/data_source_genesyscloud_${packageName}_test.go`;
-      case "resourceTest":
-        return `output/${packageName}/resource_genesyscloud_${packageName}_test.go`;
-      default:
-        throw new Error(`Unknown file type ${fileType}`);
     }
   }
 }

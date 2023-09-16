@@ -1,19 +1,19 @@
 import {
-  camelToPascal, camelToSnake, pascalToCamel,
+  camelToPascal,
+  camelToSnake,
+  pascalToCamel,
 } from "../utils/variableRenames";
 import { Generator } from "./Generator";
 import { SwaggerSchemaProperty } from "../types/Swagger";
-import templates from "../utils/templates";
 import { UtilsGenerator } from "./UtilsGenerator";
+import { TemplateGenerator } from "./TemplateGenerator";
 
-export class ResourceGenerator extends Generator {
-  template: string;
-  outputLocation: string;
+class ResourceGenerator extends Generator {
+  templateGenerator: TemplateGenerator;
 
   constructor() {
     super();
-    this.template = templates.get("resource")!
-    this.outputLocation = this.getOutputLocation("resource");
+    this.templateGenerator = new TemplateGenerator();
   }
 
   // generate the resource file
@@ -22,7 +22,7 @@ export class ResourceGenerator extends Generator {
       console.info(
         `Creating resource file structure for ${Generator.globalData.englishName}`
       );
-      this.generateFile(this.template, this.outputLocation, {
+      this.templateGenerator.generate("resource", {
         skeletonStructure: true,
       });
       console.info(
@@ -31,12 +31,14 @@ export class ResourceGenerator extends Generator {
       return;
     }
 
-    console.info(`Creating resource file for ${Generator.globalData.englishName}`);
+    console.info(
+      `Creating resource file for ${Generator.globalData.englishName}`
+    );
     const resourceData = {
       readProperties: this.generateReadStatements(),
     };
 
-    this.generateFile(this.template, this.outputLocation, resourceData);
+    this.templateGenerator.generate("resource", resourceData);
     console.info(
       `Created resource file for ${Generator.globalData.englishName}`
     );
@@ -71,7 +73,7 @@ export class ResourceGenerator extends Generator {
     name: string,
     property: SwaggerSchemaProperty
   ): string {
-    // evaluate the property type 
+    // evaluate the property type
     switch (this.evaluatePropertyType(name, property)) {
       case "basic type":
         return this.generateReadStatement(name);
@@ -85,7 +87,7 @@ export class ResourceGenerator extends Generator {
         }
         throw new Error(`Unable to handle nested object ${name}: ${property}`);
       case "string array":
-        
+
       case "nested object array":
         if (property.items?.$ref) {
           const nestedObjectName = property.items.$ref.split("/")[2];
@@ -94,7 +96,9 @@ export class ResourceGenerator extends Generator {
             `flatten${camelToPascal(nestedObjectName)}s`
           );
         }
-        throw new Error(`Unable to handle nested object array ${name}: ${property}`);
+        throw new Error(
+          `Unable to handle nested object array ${name}: ${property}`
+        );
       default:
         throw new Error(`Unknown property ${name}: ${property}`);
     }
@@ -105,7 +109,6 @@ export class ResourceGenerator extends Generator {
     property: string,
     readFunction?: string
   ): string {
-    const readPropertyTemplate = templates.get("readProperty")!
     const objectName = pascalToCamel(Generator.config.mainObject);
     const readPropertyData = {
       property: camelToSnake(property),
@@ -114,6 +117,12 @@ export class ResourceGenerator extends Generator {
       readFunction: readFunction,
     };
 
-    return this.generateTemplateStr(readPropertyTemplate, readPropertyData);
+    return this.templateGenerator.generate(
+      "readProperty",
+      readPropertyData,
+      false
+    )!;
   }
 }
+
+export default new ResourceGenerator();

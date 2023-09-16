@@ -1,35 +1,16 @@
-import templates from "../utils/templates";
 import { Generator } from "./Generator";
+import { TemplateGenerator } from "./TemplateGenerator";
 
 export class TestGenerator extends Generator {
-  template: string;
-  outputLocation: string;
-
   createTestFiles: boolean;
   createInitTest: boolean;
-
-  // test files templates
-  initTest: string;
-  dataSourceTest: string;
-  resourceTest: string;
-
-  // test files output locations
-  initTestOutput: string;
-  dataSourceTestOutput: string;
-  resourceTestOutput: string;
+  templateGenerator: TemplateGenerator;
 
   constructor(testFiles: boolean = false, initTest: boolean = false) {
     super();
+    this.templateGenerator = new TemplateGenerator();
     this.createTestFiles = testFiles;
     this.createInitTest = initTest;
-    this.initTest = templates.get("initTest")!;
-    this.dataSourceTest = templates.get("dataSourceTest")!;
-    this.resourceTest = templates.get("resourceTest")!;
-    this.initTestOutput = this.getOutputLocation("initTest");
-    this.dataSourceTestOutput = this.getOutputLocation("dataSourceTest");
-    this.resourceTestOutput = this.getOutputLocation("resourceTest");
-    this.template = "";
-    this.outputLocation= "";
   }
 
   public generate() {
@@ -37,7 +18,7 @@ export class TestGenerator extends Generator {
       console.info(
         `Creating init test file for ${Generator.globalData.englishName}`
       );
-      this.generateFile(this.initTest, this.initTestOutput);
+      this.templateGenerator.generate("initTest");
       console.info(
         `Created init test file for ${Generator.globalData.englishName}`
       );
@@ -46,8 +27,8 @@ export class TestGenerator extends Generator {
       console.info(
         `Creating test files for ${Generator.globalData.englishName}`
       );
-      this.generateFile(this.dataSourceTest, this.dataSourceTestOutput);
-      this.generateFile(this.resourceTest, this.resourceTestOutput);
+      this.templateGenerator.generate("dataSourceTest");
+      this.templateGenerator.generate("resourceTest");
       console.info(
         `Created test files for ${Generator.globalData.englishName}`
       );

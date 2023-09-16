@@ -6,10 +6,10 @@ import * as yaml from "js-yaml";
 import { Config } from "./types/Config";
 
 // generators
-import { SchemaGenerator } from "./generators/SchemaGenerator";
-import { ProxyGenerator } from "./generators/ProxyGenerator";
-import { ResourceGenerator } from "./generators/ResourceGenerator";
-import { DataSourceGenerator } from "./generators/DataSourceGenerator"; 
+import SchemaGenerator from "./generators/SchemaGenerator";
+import ProxyGenerator from "./generators/ProxyGenerator";
+import ResourceGenerator from "./generators/ResourceGenerator";
+import DataSourceGenerator from "./generators/DataSourceGenerator"; 
 import { TestGenerator } from "./generators/TestGenerator";
 
 // Read config file
@@ -21,20 +21,16 @@ createFolderIfNotExists("output");
 createFolderIfNotExists(`output/${config.package}`);
 
 // Generate schema file
-const schemaGenerator = new SchemaGenerator();
-schemaGenerator.generate();
+SchemaGenerator.generate();
 
 // Generate proxy file
-const proxyGenerator = new ProxyGenerator();
-proxyGenerator.generate();
+ProxyGenerator.generate();
 
 // Generate resource file
-const resourceGenerator = new ResourceGenerator();
-resourceGenerator.generate();
+ResourceGenerator.generate();
 
 // Generate data source file
-const dataSourceGenerator = new DataSourceGenerator();
-dataSourceGenerator.generate();
+DataSourceGenerator.generate();
 
 // Generate test files
 const testGenerator = new TestGenerator(config.testFiles, config.initTest);

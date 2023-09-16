@@ -1,5 +1,4 @@
 import { SwaggerSchema, SwaggerSchemaProperty } from "../types/Swagger";
-import templates from "../utils/templates";
 import {
   camelToPascal,
   camelToSnake,
@@ -7,6 +6,7 @@ import {
   pascalToCamel,
 } from "../utils/variableRenames";
 import { Generator } from "./Generator";
+import { TemplateGenerator } from "./TemplateGenerator";
 
 interface NestedData {
   objectPascal: string;
@@ -24,23 +24,22 @@ interface NestedObjectPropertyData {
 }
 
 export class UtilsGenerator extends Generator {
-  template: string;
-  outputLocation: string;
+  templateGenerator: TemplateGenerator;
 
   constructor() {
     super();
-    this.template = templates.get("utils")!;
-    this.outputLocation = this.getOutputLocation("utils");
+    this.templateGenerator = new TemplateGenerator();
   }
 
   // generate utils file
   public generate() {
+    this.templateGenerator = new TemplateGenerator();
     const utilsData = {
       resourceDataFunc: this.generateResourceDataFunc(),
       nestedObjects: this.handleNestedObjects(),
     };
 
-    this.generateFile(this.template, this.outputLocation, utilsData);
+    this.templateGenerator.generate("utils", utilsData);
   }
 
   private generateResourceDataFunc(): string {
@@ -50,7 +49,11 @@ export class UtilsGenerator extends Generator {
       basicProperties: this.generateBasicProperties(),
       complexProperties: this.generateComplexProperties(),
     };
-    return this.generateTemplateStr(templates.get("createResourceData")!, resourceDataFuncData);
+    return this.templateGenerator.generate(
+      "createResourceData",
+      resourceDataFuncData,
+      false
+    )!;
   }
 
   private generateBasicProperties(): object[] {
@@ -85,7 +88,9 @@ export class UtilsGenerator extends Generator {
       }
       if (this.evaluatePropertyType(name, property) === "nested object") {
         complexProperties.push(
-          `build${camelToPascal(name)}(d.Get("${camelToSnake(name)}").(interface{}))`
+          `build${camelToPascal(name)}(d.Get("${camelToSnake(
+            name
+          )}").(interface{}))`
         );
       }
       if (
@@ -180,10 +185,11 @@ export class UtilsGenerator extends Generator {
         default:
           throw new Error(`Unable to handle property ${name}: ${property}`);
       }
-      return that.generateTemplateStr(
-        templates.get("buildProperty")!,
-        buildPropertyData
-      );
+      return that.templateGenerator.generate(
+        "buildProperty",
+        buildPropertyData,
+        false
+      )!;
     }
 
     if (nestedObject.properties) {
@@ -194,10 +200,14 @@ export class UtilsGenerator extends Generator {
         buildProperties.push(generateBuildProperty(name, property));
       }
     }
-    return this.generateTemplateStr(templates.get("buildFunction")!, {
-      ...objectData,
-      buildProperties: buildProperties,
-    });
+    return this.templateGenerator.generate(
+      "buildFunction",
+      {
+        ...objectData,
+        buildProperties: buildProperties,
+      },
+      false
+    )!;
   }
 
   // generates a flatten function for a nested object
@@ -231,20 +241,20 @@ export class UtilsGenerator extends Generator {
         case "string array":
           break;
         case "nested object array":
-          console.log("nested object array");
           if (property.items?.$ref) {
             const nestedObjectName = property.items.$ref.split("/")[2];
             flattenPropertyData.nestedObjectFunc = `flatten${nestedObjectName}s`;
           }
           break;
         default:
-          throw new Error(`Unable to handle property ${name}: ${property}`)
+          throw new Error(`Unable to handle property ${name}: ${property}`);
       }
-      
-      return that.generateTemplateStr(
-        templates.get("flattenProperty")!,
-        flattenPropertyData
-      );
+
+      return that.templateGenerator.generate(
+        "flattenProperty",
+        flattenPropertyData,
+        false
+      )!;
     }
 
     if (nestedObject.properties) {
@@ -256,9 +266,13 @@ export class UtilsGenerator extends Generator {
       }
     }
 
-    return this.generateTemplateStr(templates.get("flattenFunction")!, {
-      ...objectData,
-      flattenProperties: flattenProperties,
-    });
+    return this.templateGenerator.generate(
+      "flattenFunction",
+      {
+        ...objectData,
+        flattenProperties: flattenProperties,
+      },
+      false
+    )!;
   }
 }

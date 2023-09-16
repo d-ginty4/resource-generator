@@ -1,8 +1,8 @@
 import { SwaggerSchema, SwaggerSchemaProperty } from "../types/Swagger";
 import schemaTypes from "../utils/schemaTypes";
 import { Generator } from "./Generator";
-import templates from "../utils/templates";
 import { camelToSnake } from "../utils/variableRenames";
+import { TemplateGenerator } from "./TemplateGenerator";
 
 interface SchemaPropertyData {
   name: string;
@@ -14,14 +14,12 @@ interface SchemaPropertyData {
 }
 
 // This class generates a terraform schema for the main object and all nested objects
-export class SchemaGenerator extends Generator {
-  template: string;
-  outputLocation: string;
+class SchemaGenerator extends Generator {
+  templateGenerator: TemplateGenerator;
 
   constructor() {
     super();
-    this.template = templates.get("schema")!
-    this.outputLocation = this.getOutputLocation("schema");
+    this.templateGenerator = new TemplateGenerator();
   }
 
   // generates the terraform schema file
@@ -30,7 +28,7 @@ export class SchemaGenerator extends Generator {
       console.info(
         `Creating schema file structure for ${Generator.globalData.englishName}`
       );
-      this.generateFile(this.template, this.outputLocation, {
+      this.templateGenerator.generate("schema", {
         skeletonStructure: true,
       });
       console.info(
@@ -45,13 +43,12 @@ export class SchemaGenerator extends Generator {
       nestedObjectSchemas: this.createNestedObjectSchemas(),
     };
 
-    this.generateFile(this.template, this.outputLocation, schemaData);
+    this.templateGenerator.generate("schema", schemaData);
     console.info(`Created schema file for ${Generator.config.mainObject}`);
   }
 
   // creates a terraform schema for each nested object
   private createNestedObjectSchemas(): string[] {
-    const nestedResourceTemplate = templates.get("nestedSchema")!;
     const nestedObjectSchemas: string[] = [];
 
     // iterate through nested objects in reverse order so that the nested objects are created in the correct order
@@ -69,7 +66,11 @@ export class SchemaGenerator extends Generator {
       };
 
       nestedObjectSchemas.push(
-        this.generateTemplateStr(nestedResourceTemplate, nestedObjectData)
+        this.templateGenerator.generate(
+          "nestedSchema",
+          nestedObjectData,
+          false
+        )!
       );
       console.info(`Created nested schema for ${nestedObjectName}`);
     }
@@ -110,8 +111,6 @@ export class SchemaGenerator extends Generator {
     property: SwaggerSchemaProperty,
     required: boolean
   ): string {
-    const propertyTemplate = templates.get("schemaProperty")!
-
     const propertyData: SchemaPropertyData = {
       name: camelToSnake(name),
       description: property.description || "",
@@ -147,6 +146,12 @@ export class SchemaGenerator extends Generator {
         throw new Error(`Unknown property ${name}: ${property}`);
     }
 
-    return this.generateTemplateStr(propertyTemplate, propertyData);
+    return this.templateGenerator.generate(
+      "schemaProperty",
+      propertyData,
+      false
+    )!;
   }
 }
+
+export default new SchemaGenerator();

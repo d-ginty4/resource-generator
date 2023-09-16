@@ -1,6 +1,6 @@
-import templates from "../utils/templates";
 import { camelToPascal, pascalToCamel } from "../utils/variableRenames";
 import { Generator } from "./Generator";
+import { TemplateGenerator } from "./TemplateGenerator";
 
 interface ProxyData {
   api: string; // e.g. OutboundApi
@@ -8,14 +8,12 @@ interface ProxyData {
   [method: string]: string; // e.g. readMethod: GetOutboundCallabletimeset
 }
 
-export class ProxyGenerator extends Generator {
-  template: string;
-  outputLocation: string;
-
+class ProxyGenerator extends Generator {
+  templateGenerator: TemplateGenerator;
+  
   constructor() {
     super();
-    this.template = templates.get("proxy")!;
-    this.outputLocation = this.getOutputLocation("proxy")
+    this.templateGenerator = new TemplateGenerator();
   }
 
   // generates the proxy file
@@ -24,7 +22,7 @@ export class ProxyGenerator extends Generator {
       console.info(
         `Creating proxy file structure for ${Generator.globalData.englishName}`
       );
-      this.generateFile(this.template, this.outputLocation, {
+      this.templateGenerator.generate("proxy", {
         skeletonStructure: true,
       });
       console.info(
@@ -49,11 +47,11 @@ export class ProxyGenerator extends Generator {
 
     const proxyData: ProxyData = {
       api: resourceApi,
-      apiCamel:pascalToCamel(resourceApi),
+      apiCamel: pascalToCamel(resourceApi),
     };
     this.getMethodNames(proxyData);
 
-    this.generateFile(this.template, this.outputLocation, proxyData);
+    this.templateGenerator.generate("proxy", proxyData);
     console.info(`Created proxy file for ${Generator.globalData.englishName}`);
   }
 
@@ -67,3 +65,5 @@ export class ProxyGenerator extends Generator {
     }
   }
 }
+
+export default new ProxyGenerator();

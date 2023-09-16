@@ -16,5 +16,3 @@ operations:
   - type: getAll
     method: GET
     path: /api/v2/responsemanagement/libraries
-testFiles: true
-initTest: true
