@@ -1,10 +1,7 @@
 import {
-  camelToPascal,
-  camelToSnake,
   pascalToCamel,
 } from "../utils/variableRenames";
 import { Generator } from "./Generator";
-import { SwaggerSchemaProperty } from "../types/Swagger";
 //import { UtilsGenerator } from "./UtilsGenerator";
 import { TemplateGenerator } from "./TemplateGenerator";
 
@@ -52,79 +49,19 @@ class ResourceGenerator extends Generator {
 
   // generate the statements needed read the properties of the main object
   private generateReadStatements(): string[] {
-    const mainObject = Generator.mainObject;
-    const properties = mainObject.properties;
-
     const readStatements: string[] = [];
-
-    if (properties) {
-      for (const [propertyName, property] of Object.entries(properties)) {
-        if (!this.isIgnorableProperty(propertyName)) {
-          readStatements.push(this.handleProperty(propertyName, property));
-        }
-      }
-    }
-
+    
+    Generator.parentObject.getProperties().forEach((property) => {
+      const readStatementData = {
+        ...property,
+        objectName: pascalToCamel(Generator.config.mainObject),
+      };
+      readStatements.push(
+        this.templateGenerator.generate("readProperty", property, false)!
+      );
+    })
+    
     return readStatements;
-  }
-
-  // generate the appropriate read statement based on the property type
-  private handleProperty(
-    name: string,
-    property: SwaggerSchemaProperty
-  ): string {
-    // evaluate the property type
-    switch (this.evaluatePropertyType(name, property)) {
-      case "basic type":
-        return this.generateReadStatement(name);
-      case "nested object":
-        if (property.items?.$ref) {
-          const nestedObjectName = property.items.$ref.split("/")[2];
-          return this.generateReadStatement(
-            name,
-            `flatten${camelToPascal(nestedObjectName)}`
-          );
-        }
-        throw new Error(`Unable to handle nested object ${name}: ${property}`);
-      case "string array":
-
-      case "nested object array":
-        if (property.items?.$ref) {
-          const nestedObjectName = property.items.$ref.split("/")[2];
-          return this.generateReadStatement(
-            name,
-            `flatten${camelToPascal(nestedObjectName)}s`
-          );
-        }
-        throw new Error(
-          `Unable to handle nested object array ${name}: ${property}`
-        );
-      default:
-        throw new Error(`Unknown property ${name}: ${property}`);
-    }
-  }
-  evaluatePropertyType(name: string, property: SwaggerSchemaProperty) : string {
-    throw new Error("Method not implemented.");
-  }
-
-  // generate the read statement for a property using the template
-  private generateReadStatement(
-    property: string,
-    readFunction?: string
-  ): string {
-    const objectName = pascalToCamel(Generator.config.mainObject);
-    const readPropertyData = {
-      property: camelToSnake(property),
-      objectName: objectName,
-      objectProperty: camelToPascal(property),
-      readFunction: readFunction,
-    };
-
-    return this.templateGenerator.generate(
-      "readProperty",
-      readPropertyData,
-      false
-    )!;
   }
 }
 

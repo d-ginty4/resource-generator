@@ -5,10 +5,8 @@ import * as fs from "fs";
 // types
 import { Config } from "../types/Config";
 import {
-  Definitions,
   Swagger,
   SwaggerSchema,
-  SwaggerSchemaProperty,
 } from "../types/Swagger";
 import { GlobalData } from "../types/GlobalData";
 
@@ -146,7 +144,7 @@ export abstract class Generator {
             objectData: this.setObject(Generator.swagger.definitions[objName]),
           });
         }
-        prop.createTFSchemaData();
+        prop.generateData();
         
         tempObject.addProperty(prop);
       }

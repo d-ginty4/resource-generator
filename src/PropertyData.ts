@@ -1,4 +1,5 @@
 import { ObjectData } from "./ObjectData";
+import { camelToPascal, camelToSnake } from "./utils/variableRenames";
 
 interface TFSchemaData {
   type?: string;
@@ -7,6 +8,7 @@ interface TFSchemaData {
 }
 
 export class PropertyData {
+  // User provided data
   private name: string = "";
   private type: string = "";
   private description: string = "";
@@ -14,11 +16,17 @@ export class PropertyData {
   private isStringArray?: boolean = false;
   private nestedObject?: { objectName: string; objectData: ObjectData } =
     undefined;
+
+  // Generated data
+  private snakeName: string = "";
+  private pascalName: string = "";
+  private flattenFunction?: string = undefined;
+  private buildFunction?: string = undefined;
   private tfSchemaData?: TFSchemaData = undefined;
 
   public setName(name: string): void {
     this.name = name;
-  }
+  } 
 
   public setType(type: string): void {
     this.type = type;
@@ -40,6 +48,12 @@ export class PropertyData {
     value: { objectName: string; objectData: ObjectData } | undefined
   ) {
     this.nestedObject = value;
+  }
+
+  public generateData(): void {
+    this.createNames();
+    this.createTFSchemaData();
+    this.createUtilFunctions();
   }
 
   public getName(): string {
@@ -68,11 +82,27 @@ export class PropertyData {
     return this.nestedObject;
   }
 
+  public getSnakeName(): string {
+    return this.snakeName;
+  }
+
+  public getPascalName(): string {
+    return this.pascalName;
+  }
+
+  public getFlattenFunction(): string | undefined {
+    return this.flattenFunction;
+  }
+
+  public getBuildFunction(): string | undefined {
+    return this.buildFunction;
+  }
+
   public getTFSchemaData(): TFSchemaData | undefined {
     return this.tfSchemaData;
   }
 
-  public createTFSchemaData(): void {
+  private createTFSchemaData(): void {
     if (!this.type) {
       throw new Error("Cannot generate TFSchemaProps without original type");
     }
@@ -105,5 +135,21 @@ export class PropertyData {
         throw new Error(`Unknown type`);
     }
     this.tfSchemaData = schemaProperties;
+  }
+
+  private createNames(): void {
+    this.snakeName = camelToSnake(this.name);
+    this.pascalName = camelToPascal(this.name);
+  }
+
+  private createUtilFunctions(): void {
+    // Flatten function
+    if (this.type === "object") {
+      this.flattenFunction = "flatten" + this.nestedObject?.objectName;
+      this.buildFunction = "build" + this.nestedObject?.objectName;
+    } else if (this.type === "array" && !this.isStringArray){
+      this.flattenFunction = "flatten" + this.nestedObject?.objectName + "s";
+      this.buildFunction = "build" + this.nestedObject?.objectName + "s";
+    }
   }
 }
