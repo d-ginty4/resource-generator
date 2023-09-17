@@ -23,18 +23,18 @@ createFolderIfNotExists(`output/${config.package}`);
 // Generate schema file
 SchemaGenerator.generate();
 
-// Generate proxy file
-ProxyGenerator.generate();
+// // Generate proxy file
+// ProxyGenerator.generate();
 
-// Generate resource file
-ResourceGenerator.generate();
+// // Generate resource file
+// ResourceGenerator.generate();
 
-// Generate data source file
-DataSourceGenerator.generate();
+// // Generate data source file
+// DataSourceGenerator.generate();
 
-// Generate test files
-const testGenerator = new TestGenerator(config.testFiles, config.initTest);
-testGenerator.generate();
+// // Generate test files
+// const testGenerator = new TestGenerator(config.testFiles, config.initTest);
+// testGenerator.generate();
 
 function createFolderIfNotExists(folderPath: string) {
   try {

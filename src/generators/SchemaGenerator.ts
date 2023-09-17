@@ -1,8 +1,7 @@
-import { SwaggerSchema, SwaggerSchemaProperty } from "../types/Swagger";
-import schemaTypes from "../utils/schemaTypes";
 import { Generator } from "./Generator";
 import { camelToSnake } from "../utils/variableRenames";
 import { TemplateGenerator } from "./TemplateGenerator";
+import { ObjectData } from "../ObjectData";
 
 interface SchemaPropertyData {
   name: string;
@@ -16,7 +15,6 @@ interface SchemaPropertyData {
 // This class generates a terraform schema for the main object and all nested objects
 class SchemaGenerator extends Generator {
   templateGenerator: TemplateGenerator;
-
   constructor() {
     super();
     this.templateGenerator = new TemplateGenerator();
@@ -38,119 +36,43 @@ class SchemaGenerator extends Generator {
     }
 
     console.info(`Creating schema file for ${Generator.config.mainObject}`);
-    const schemaData = {
-      properties: this.createProperties(Generator.mainObject),
-      nestedObjectSchemas: this.createNestedObjectSchemas(),
+    const data = {
+      properties: this.generateProperties(Generator.parentObject),
+      nestedObjectSchemas: this.generateNestedSchemas(Generator.parentObject, []),
     };
-
-    this.templateGenerator.generate("schema", schemaData);
+    this.templateGenerator.generate("schema", data);
     console.info(`Created schema file for ${Generator.config.mainObject}`);
   }
 
-  // creates a terraform schema for each nested object
-  private createNestedObjectSchemas(): string[] {
-    const nestedObjectSchemas: string[] = [];
-
-    // iterate through nested objects in reverse order so that the nested objects are created in the correct order
-    for (const nestedObjectName of Generator.nestedObjects.reverse()) {
-      console.info(`Creating nested schema for ${nestedObjectName}`);
-      const nestedObject = Generator.swagger.definitions[nestedObjectName];
-      if (!nestedObject) {
-        throw new Error(
-          `The nested object ${nestedObjectName} does not exist in the swagger file`
-        );
-      }
-      const nestedObjectData = {
-        objectName: nestedObjectName,
-        properties: this.createProperties(nestedObject),
-      };
-
-      nestedObjectSchemas.push(
-        this.templateGenerator.generate(
-          "nestedSchema",
-          nestedObjectData,
-          false
-        )!
+  private generateProperties(obj: ObjectData): string[] {
+    const tfProperties: string[] = [];
+    obj.getProperties().forEach((property) => {
+      tfProperties.push(
+        this.templateGenerator.generate("schemaProperty", property, false)!
       );
-      console.info(`Created nested schema for ${nestedObjectName}`);
-    }
-
-    return nestedObjectSchemas;
+    });
+    return tfProperties;
   }
 
-  // translates an objects properties into terraform schema properties
-  private createProperties(object: SwaggerSchema): string[] {
-    const properties = object.properties;
-    const required = object.required;
-    const propertiesTF: string[] = [];
-
-    if (properties) {
-      for (const [propertyName, property] of Object.entries(properties)) {
-        if (this.isIgnorableProperty(propertyName)) {
-          continue;
-        }
-        let isRequired = false;
-        if (required && required.includes(propertyName)) {
-          isRequired = true;
-        }
-        const propertyTF = this.generateTFProperty(
-          propertyName,
-          property,
-          isRequired
+  private generateNestedSchemas(obj: ObjectData, tfSchemas: string[]): string[] {
+    obj.getProperties().forEach((property) => {
+      if (property.getNestedObject()) {
+        const schemaData = {
+          objectName: property.getNestedObject()!.objectName,
+          properties: this.generateProperties(
+            property.getNestedObject()?.objectData!
+          ),
+        };
+        tfSchemas.push(
+          this.templateGenerator.generate("nestedSchema", schemaData, false)!
         );
-        propertiesTF.push(propertyTF);
+        tfSchemas = this.generateNestedSchemas(
+          property.getNestedObject()!.objectData,
+          tfSchemas
+        );
       }
-    }
-
-    return propertiesTF;
-  }
-
-  // generates a terraform schema property using the template
-  private generateTFProperty(
-    name: string,
-    property: SwaggerSchemaProperty,
-    required: boolean
-  ): string {
-    const propertyData: SchemaPropertyData = {
-      name: camelToSnake(name),
-      description: property.description || "",
-      required: required,
-      type: "",
-    };
-
-    // Evaluate the type of the property
-    switch (this.evaluatePropertyType(name, property)) {
-      case "basic type":
-        propertyData.type = schemaTypes.get(property.type)!;
-        break;
-      case "nested object":
-        if (property.items?.$ref) {
-          propertyData.type = "schema.TypeList";
-          propertyData.singleItem = true;
-          propertyData.element =
-            property.items.$ref.split("/")[2] + "Resource,";
-        }
-        break;
-      case "string array":
-        propertyData.type = "schema.TypeList";
-        propertyData.element = "&schema.Schema{Type: schema.TypeString}";
-        break;
-      case "nested object array":
-        if (property.items?.$ref) {
-          propertyData.type = "schema.TypeList";
-          propertyData.element =
-            property.items.$ref.split("/")[2] + "Resource,";
-        }
-        break;
-      default:
-        throw new Error(`Unknown property ${name}: ${property}`);
-    }
-
-    return this.templateGenerator.generate(
-      "schemaProperty",
-      propertyData,
-      false
-    )!;
+    });
+    return tfSchemas;
   }
 }
 

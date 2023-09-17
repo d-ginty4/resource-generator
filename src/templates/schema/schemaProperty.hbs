@@ -1,8 +1,8 @@
-"{{name}}": {
+"{{name}}": { 
     Description: "{{{description}}}",{{#if required}}
-    Required:    true,{{else}}
-    Optional:    true,{{/if}}
-    Type:        {{type}},{{#if singleItem}}
-    MaxItems:    1{{/if}}{{#if element}}
-    Elem:        {{element}}{{/if}}
+    Required: true,{{else}}
+    Optional: true,{{/if}}
+    Type:   {{tfSchemaData.type}},{{#if tfSchemaData.maxItems}}
+    MaxItems: {{tfSchemaData.maxItems}},{{/if}}{{#if tfSchemaData.element}}
+    Elem: {{tfSchemaData.element}},{{/if}}
 },

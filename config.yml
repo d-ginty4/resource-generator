@@ -1,18 +1,18 @@
-package: responsemanagement_library
-mainObject: Library
+package: outbound_callabletimeset
+mainObject: CallableTimeSet
 operations:
   - type: create
     method: POST
-    path: /api/v2/responsemanagement/libraries
+    path: /api/v2/outbound/callabletimesets
   - type: read
     method: GET
-    path: /api/v2/responsemanagement/libraries/{libraryId}
+    path: /api/v2/outbound/callabletimesets/{callableTimeSetId}
   - type: update 
     method: PUT
-    path: /api/v2/responsemanagement/libraries/{libraryId}
+    path: /api/v2/outbound/callabletimesets/{callableTimeSetId}
   - type: delete
     method: DELETE
-    path: /api/v2/responsemanagement/libraries/{libraryId}
+    path: /api/v2/outbound/callabletimesets/{callableTimeSetId}
   - type: getAll
     method: GET
-    path: /api/v2/responsemanagement/libraries
+    path: /api/v2/outbound/callabletimesets

@@ -5,7 +5,7 @@ import {
 } from "../utils/variableRenames";
 import { Generator } from "./Generator";
 import { SwaggerSchemaProperty } from "../types/Swagger";
-import { UtilsGenerator } from "./UtilsGenerator";
+//import { UtilsGenerator } from "./UtilsGenerator";
 import { TemplateGenerator } from "./TemplateGenerator";
 
 class ResourceGenerator extends Generator {
@@ -45,8 +45,8 @@ class ResourceGenerator extends Generator {
 
     if (!Generator.skeltonStructure || !Generator.config.skeletonResourceFile) {
       // generate the utils file
-      const utilsGenerator = new UtilsGenerator();
-      utilsGenerator.generate();
+      // const utilsGenerator = new UtilsGenerator();
+      // utilsGenerator.generate();
     }
   }
 
@@ -102,6 +102,9 @@ class ResourceGenerator extends Generator {
       default:
         throw new Error(`Unknown property ${name}: ${property}`);
     }
+  }
+  evaluatePropertyType(name: string, property: SwaggerSchemaProperty) : string {
+    throw new Error("Method not implemented.");
   }
 
   // generate the read statement for a property using the template

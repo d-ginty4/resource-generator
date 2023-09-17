@@ -20,19 +20,20 @@ import {
   snakeToEnglish,
   snakeToPascal,
 } from "../utils/variableRenames";
+import { PropertyData } from "../PropertyData";
+import { ObjectData } from "../ObjectData";
 
 export abstract class Generator {
   // protected properties
   protected static config: Config;
   protected static swagger: Swagger;
   protected static globalData: GlobalData;
-  protected static nestedObjects: string[];
   protected static mainObject: SwaggerSchema;
   protected static skeltonStructure: boolean;
+  protected static parentObject: ObjectData;
 
   // private properties
   private ignorableProperties: string[] = [];
-  private basicTypes: string[];
 
   constructor() {
     Generator.config = this.setConfig();
@@ -47,8 +48,6 @@ export abstract class Generator {
 
     Generator.swagger = this.setSwagger();
     Generator.globalData = this.setGlobalData();
-    Generator.nestedObjects = this.setNestedObjects();
-    this.basicTypes = ["string", "integer", "boolean"];
 
     const properties: string[] = [
       "id",
@@ -74,6 +73,8 @@ export abstract class Generator {
         `The main object ${Generator.config.mainObject} does not exist in the swagger file`
       );
     }
+
+    Generator.parentObject = this.setObject(Generator.mainObject);
   }
 
   private setConfig(): Config {
@@ -103,91 +104,59 @@ export abstract class Generator {
     return data;
   }
 
-  private setNestedObjects(): string[] {
-    const definitions: Definitions = Generator.swagger.definitions;
-    const objectNames: Set<string> = new Set(); // A set prevents duplicated objects being added
-    const that = this;
+  private setObject(object: SwaggerSchema): ObjectData {
+    const required = object.required || [];
+    const properties = object.properties;
+    const tempObject = new ObjectData();
 
-    function findObjects(obj: SwaggerSchema) {
-      const properties = obj.properties;
-      // Check if there's properties
-      if (properties) {
-        // Loop through every property
-        for (const [propertyName, property] of Object.entries(properties)) {
-          if (that.isIgnorableProperty(propertyName)) {
+    if (properties) {
+      for (const [propertyName, property] of Object.entries(properties)) {
+        if (this.isIgnorableProperty(propertyName)) {
+          continue;
+        }
+        const prop = new PropertyData();
+        prop.setName(propertyName);
+        property.type ? prop.setType(property.type) : prop.setType("object");
+        property.description
+          ? prop.setDescription(property.description)
+          : prop.setDescription("");
+        required.includes(propertyName)
+          ? prop.setRequired(true)
+          : prop.setRequired(false);
+
+        if (prop.getType() === "array") {
+          if (property.items?.type === "string") {
+            prop.setIsStringArray(true);
             continue;
           }
-          // Handle nested object
-          if (property.$ref) {
-            const objectName = property.$ref.split("/")[2];
-            objectNames.add(objectName);
-            findObjects(definitions[objectName]);
-            return;
+          if (property.items?.$ref) {
+            const objName = property.items?.$ref.split("/")[2]!;
+            prop.setNestedObject({
+              objectName: objName,
+              objectData: this.setObject(
+                Generator.swagger.definitions[objName]
+              ),
+            });
           }
-          // Handle array of nested objects
-          else if (
-            property.type === "array" &&
-            property.items?.type !== "string" &&
-            property.items?.$ref
-          ) {
-            const objectName = property.items.$ref.split("/")[2];
-            objectNames.add(objectName);
-            findObjects(definitions[objectName]);
-            return;
-          }
+        } else if (prop.getType() === "object") {
+          const objName = property.$ref?.split("/")[2]!;
+
+          prop.setNestedObject({
+            objectName: objName,
+            objectData: this.setObject(Generator.swagger.definitions[objName]),
+          });
         }
+        prop.createTFSchemaData();
+        
+        tempObject.addProperty(prop);
       }
     }
 
-    // Start searching at the main object
-    findObjects(definitions[Generator.config.mainObject]);
-    return Array.from(objectNames);
+    return tempObject;
   }
 
   // helpers
   protected isIgnorableProperty(propertyName: string): boolean {
     return this.ignorableProperties.includes(propertyName);
-  }
-
-  protected isBasicType(type: string): boolean {
-    return this.basicTypes.includes(type);
-  }
-
-  protected hasNestedObject(): boolean {
-    if (Generator.nestedObjects.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  // Evaluate the type of the property
-  protected evaluatePropertyType(
-    name: string,
-    property: SwaggerSchemaProperty
-  ): string {
-    // Check if property is a basic type (string, integer, etc)
-    if (this.isBasicType(property.type)) {
-      return "basic type";
-    }
-    // Check if property is nested object
-    else if (!property.items && property.$ref) {
-      return "nested object";
-    }
-    // Check if property is an array
-    else if (property.type === "array") {
-      // check if array is an array of strings
-      if (property.items?.type) {
-        return "string array";
-      }
-      // check if array is an array of nested objects
-      else if (property.items?.$ref) {
-        return "nested object array";
-      } else {
-        throw new Error(`Unknown array property ${name}: ${property}`);
-      }
-    } else {
-      throw new Error(`Unknown property ${name}: ${property}`);
-    }
   }
 }
