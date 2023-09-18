@@ -1,6 +1,6 @@
 import { Generator } from "./Generator";
 import { TemplateGenerator } from "./TemplateGenerator";
-import { ObjectData } from "../ObjectData";
+import ObjectData from "../classes/ObjectData";
 
 // This class generates a terraform schema for the main object and all nested objects
 class SchemaGenerator extends Generator {

@@ -1,5 +1,5 @@
-import { ObjectData } from "./ObjectData";
-import { camelToPascal, camelToSnake } from "./utils/variableRenames";
+import ObjectData from "./ObjectData";
+import { camelToPascal, camelToSnake } from "../utils/variableRenames";
 
 interface TFSchemaData {
   type?: string;
@@ -7,7 +7,7 @@ interface TFSchemaData {
   element?: string;
 }
 
-export class PropertyData {
+export default class PropertyData {
   // User provided data
   private name: string = "";
   private type: string = "";

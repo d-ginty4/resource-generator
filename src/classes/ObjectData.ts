@@ -1,6 +1,6 @@
-import { PropertyData } from "./PropertyData";
+import PropertyData from "./PropertyData";
 
-export class ObjectData {
+export default class ObjectData {
   private properties: PropertyData[];
 
   constructor() {

@@ -1,4 +1,4 @@
-import { ObjectData } from "../ObjectData";
+import ObjectData from "../classes/ObjectData";
 import { goSdkName, pascalToCamel } from "../utils/variableRenames";
 import { Generator } from "./Generator";
 import { TemplateGenerator } from "./TemplateGenerator";

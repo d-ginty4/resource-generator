@@ -18,8 +18,8 @@ import {
   snakeToEnglish,
   snakeToPascal,
 } from "../utils/variableRenames";
-import { PropertyData } from "../PropertyData";
-import { ObjectData } from "../ObjectData";
+import PropertyData from "../classes/PropertyData";
+import ObjectData from "../classes/ObjectData";
 
 export abstract class Generator {
   // protected properties

@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import * as handlebars from "handlebars";
+import handlebars from "../utils/handlerbarsSetup";
 
 import { Generator } from "./Generator";
 import templates from "../utils/templates";
