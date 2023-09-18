@@ -24,7 +24,7 @@ class ProxyGenerator extends Generator {
       );
       this.templateGenerator.generate("proxy", {
         skeletonStructure: true,
-      });
+      }, true);
       console.info(
         `Created proxy file structure for ${Generator.globalData.englishName}`
       );
@@ -51,7 +51,7 @@ class ProxyGenerator extends Generator {
     };
     this.getMethodNames(proxyData);
 
-    this.templateGenerator.generate("proxy", proxyData);
+    this.templateGenerator.generate("proxy", proxyData, true);
     console.info(`Created proxy file for ${Generator.globalData.englishName}`);
   }
 

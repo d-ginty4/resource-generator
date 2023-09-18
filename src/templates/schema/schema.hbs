@@ -30,9 +30,9 @@ func Resource{{pascalName}}() *schema.Resource {
 	{{#unless skeletonStructure}}
 	{{#each nestedObjectSchemas}}
 	{{{this}}}
+
 	{{/each}}
 	{{/unless}}
-	
 	return &schema.Resource{
 		Description: `Genesys Cloud {{englishName}}`,
 

@@ -17,7 +17,6 @@ import (
 
 	"terraform-provider-genesyscloud/genesyscloud/util/resourcedata"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	{{/unless}}
 )
@@ -91,7 +90,7 @@ func read{{pascalName}}(ctx context.Context, d *schema.ResourceData, meta interf
 		cc := consistency_checker.NewConsistencyCheck(ctx, d, meta, Resource{{pascalName}}())
 
 		{{#each readProperties}}
-			{{{this}}}
+		{{{this}~}}
 		{{/each}}
 
 		log.Printf("Read {{englishName}} %s %s", d.Id(), *{{mainObjectCamel}}.Name)

@@ -17,8 +17,14 @@ and unmarshal data into formats consumable by Terraform and/or Genesys Cloud.
 {{{resourceDataFunc}}}
 {{/if}}
 
-{{#if nestedObjects}}
-{{#each nestedObjects as |nestedObjectFunc|}}
-{{{nestedObjectFunc}}}
+{{#if buildFuncs}}
+{{#each buildFuncs}}
+{{{this}}}
+{{/each}}
+{{/if}}
+
+{{#if flattenFuncs}}
+{{#each flattenFuncs}}
+{{{this}}}
 {{/each}}
 {{/if}}

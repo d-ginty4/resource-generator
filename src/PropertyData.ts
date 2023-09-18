@@ -56,50 +56,14 @@ export class PropertyData {
     this.createUtilFunctions();
   }
 
-  public getName(): string {
-    return this.name;
-  }
-
   public getType(): string {
     return this.type;
-  }
-
-  public getDescription(): string {
-    return this.description;
-  }
-
-  public getRequired(): boolean {
-    return this.required;
-  }
-
-  public getIsStringArray(): boolean | undefined {
-    return this.isStringArray;
   }
 
   public getNestedObject():
     | { objectName: string; objectData: ObjectData }
     | undefined {
     return this.nestedObject;
-  }
-
-  public getSnakeName(): string {
-    return this.snakeName;
-  }
-
-  public getPascalName(): string {
-    return this.pascalName;
-  }
-
-  public getFlattenFunction(): string | undefined {
-    return this.flattenFunction;
-  }
-
-  public getBuildFunction(): string | undefined {
-    return this.buildFunction;
-  }
-
-  public getTFSchemaData(): TFSchemaData | undefined {
-    return this.tfSchemaData;
   }
 
   private createTFSchemaData(): void {

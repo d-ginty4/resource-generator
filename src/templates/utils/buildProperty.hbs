@@ -1,19 +1,12 @@
-{{#if (eq type "string")}}
-resourcedata.BuildSDKStringValueIfNotNil(&sdk{{objectPascalName}}.{{objectProperty}}, {{objectName}}sMap, "{{property}}")
-{{else}}
-{{#if (eq type "bool")}}
-{{objectName}}.{{objectProperty}} = platformclientv2.Bool(sdk{{objectPascalName}}sMap["{{property}}"].(bool))
-{{else}}
-{{#if (eq type "integer")}}
-sdk{{objectPascalName}}.{{objectProperty}} = platformclientv2.Int({{objectName}}sMap["{{property}}"].(int))
-{{else}}
-{{#if (eq type "nested object")}}
-resourcedata.BuildSDKInterfaceArrayValueIfNotNil(&sdk{{objectPascalName}}.{{objectProperty}}, {{objectName}}Map, "{{property}}", {{nestedObjectFunc}})
-{{else}}
-{{#if (eq type "nested object array")}}
-resourcedata.BuildSDKInterfaceArrayValueIfNotNil(&sdk{{objectPascalName}}.{{objectProperty}}, {{objectName}}sMap, "{{property}}", {{nestedObjectFunc}})
-{{/if}}
-{{/if}}
-{{/if}}
-{{/if}}
-{{/if}}
+{{~#if (eq type "string")~}}
+resourcedata.BuildSDKStringValueIfNotNil(&sdk{{objectPascalName}}.{{pascalName}}, {{objectName}}sMap, "{{snakeName}}")
+{{~else if (eq type "bool")~}}
+{{objectName}}.{{pascalName}} = platformclientv2.Bool(sdk{{objectPascalName}}sMap["{{snakeName}}"].(bool))
+{{~else if (eq type "integer")~}}
+sdk{{objectPascalName}}.{{pascalName}} = platformclientv2.Int({{objectName}}sMap["{{snakeName}}"].(int))
+{{~else if isStringArray~}}
+// TODO: Handle string array property
+{{~else~}}
+resourcedata.BuildSDKInterfaceArrayValueIfNotNil(&sdk{{objectPascalName}}.{{pascalName}}, {{objectName}}sMap, "{{snakeName}}", {{buildFunction}})
+{{~/if~}}
+

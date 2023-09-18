@@ -1,21 +1,17 @@
 // get{{pascalName}}FromResourceData maps data from schema ResourceData object to a platformclientv2.{{mainObjectGoSDK}}
 func get{{pascalName}}FromResourceData(d *schema.ResourceData) platformclientv2.{{mainObjectGoSDK}} {
-	{{#if basicProperties}}
-    {{#each basicProperties as |property|}}
-    {{property.propertyCamel}} := d.Get("{{property.propertySnake}}").({{property.type}})
-    {{/each}}
-    {{/if}}
-
 	return platformclientv2.{{mainObjectGoSDK}}{
-        {{#if basicProperties}}
-        {{#each basicProperties as |property|}}
-        {{property.propertyPascal}}: &{{{property.propertyCamel}}},
-        {{/each}}
-        {{/if}}
-        {{#if complexProperties}}
-        {{#each complexProperties as |property|}}
-        {{{property}}}
-        {{/each}}
-        {{/if}}
+        {{#each properties as |property|}}{{~#with property~}}
+        {{#if (eq type "string")}}
+                {{pascalName}}: platformclientv2.String(d.Get("{{snakeName}}").(string)),
+        {{else if (eq type "bool")}}
+                {{pascalName}}: platformclientv2.Bool(d.Get("{{snakeName}}").(bool)),
+        {{else if (eq type "integer")}}
+                {{pascalName}}: platformclientv2.Int(d.Get("{{snakeName}}").(int)),
+        {{else if isStringArray}}
+                // TODO: Handle string array property
+        {{else}}
+                {{pascalName}}: {{buildFunction}}(d.Get("{{snakeName}}").([]interface{})),
+        {{/if}}{{~/with~}}{{/each}}
 	}
 }

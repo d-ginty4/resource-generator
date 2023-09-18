@@ -16,7 +16,7 @@ class DataSourceGenerator extends Generator {
       );
       this.templateGenerator.generate("dataSource", {
         skeletonStructure: true,
-      });
+      }, true);
       console.info(
         `Created data source skeleton structure for ${Generator.globalData.englishName}`
       );
@@ -26,7 +26,7 @@ class DataSourceGenerator extends Generator {
     console.info(
       `Creating data source file for ${Generator.globalData.englishName}`
     );
-    this.templateGenerator.generate("dataSource");
+    this.templateGenerator.generate("dataSource", undefined, true);
     console.info(
       `Created data source file for ${Generator.globalData.englishName}`
     );

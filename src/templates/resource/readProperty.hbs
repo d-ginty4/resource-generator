@@ -1,3 +1,5 @@
-{{#if property.readFunction}}
-resourcedata.SetNillableValueWithInterfaceArrayWithFunc(d, "{{property.snakeName}}", {{objectName}}.{{property.pascalName}}, {{property.readFunction}}){{else}}
-resourcedata.SetNillableValue(d, "{{property.snakeName}}", {{objectName}}.{{property.pascalName}}){{/if}}
+{{#if flattenFunction}}
+resourcedata.SetNillableValueWithInterfaceArrayWithFunc(d, "{{snakeName}}", {{objectName}}.{{pascalName}}, {{flattenFunction}})
+{{else}}
+resourcedata.SetNillableValue(d, "{{snakeName}}", {{objectName}}.{{pascalName}})
+{{/if}}

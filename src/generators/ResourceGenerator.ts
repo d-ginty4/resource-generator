@@ -1,9 +1,7 @@
-import {
-  pascalToCamel,
-} from "../utils/variableRenames";
+import { pascalToCamel } from "../utils/variableRenames";
 import { Generator } from "./Generator";
-//import { UtilsGenerator } from "./UtilsGenerator";
 import { TemplateGenerator } from "./TemplateGenerator";
+import UtilsGenerator from "./UtilsGenerator";
 
 class ResourceGenerator extends Generator {
   templateGenerator: TemplateGenerator;
@@ -19,9 +17,13 @@ class ResourceGenerator extends Generator {
       console.info(
         `Creating resource file structure for ${Generator.globalData.englishName}`
       );
-      this.templateGenerator.generate("resource", {
-        skeletonStructure: true,
-      });
+      this.templateGenerator.generate(
+        "resource",
+        {
+          skeletonStructure: true,
+        },
+        true
+      );
       console.info(
         `Created resource file structure for ${Generator.globalData.englishName}`
       );
@@ -31,36 +33,42 @@ class ResourceGenerator extends Generator {
     console.info(
       `Creating resource file for ${Generator.globalData.englishName}`
     );
-    const resourceData = {
-      readProperties: this.generateReadStatements(),
-    };
-
-    this.templateGenerator.generate("resource", resourceData);
+    this.templateGenerator.generate(
+      "resource",
+      {
+        readProperties: this.generateReadStatements(),
+      },
+      true
+    );
     console.info(
       `Created resource file for ${Generator.globalData.englishName}`
     );
 
     if (!Generator.skeltonStructure || !Generator.config.skeletonResourceFile) {
       // generate the utils file
-      // const utilsGenerator = new UtilsGenerator();
-      // utilsGenerator.generate();
+      console.info(
+        `Creating utils file for ${Generator.globalData.englishName}`
+      );
+      UtilsGenerator.generate();
+      console.info(
+        `Created utils file for ${Generator.globalData.englishName}`
+      );
     }
   }
 
   // generate the statements needed read the properties of the main object
   private generateReadStatements(): string[] {
     const readStatements: string[] = [];
-    
+
     Generator.parentObject.getProperties().forEach((property) => {
-      const readStatementData = {
+      readStatements.push(
+        this.templateGenerator.generate("readProperty", {
         ...property,
         objectName: pascalToCamel(Generator.config.mainObject),
-      };
-      readStatements.push(
-        this.templateGenerator.generate("readProperty", property, false)!
+      })!
       );
-    })
-    
+    });
+
     return readStatements;
   }
 }

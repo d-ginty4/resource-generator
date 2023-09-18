@@ -18,7 +18,7 @@ export class TestGenerator extends Generator {
       console.info(
         `Creating init test file for ${Generator.globalData.englishName}`
       );
-      this.templateGenerator.generate("initTest");
+      this.templateGenerator.generate("initTest", undefined, true);
       console.info(
         `Created init test file for ${Generator.globalData.englishName}`
       );
@@ -27,8 +27,8 @@ export class TestGenerator extends Generator {
       console.info(
         `Creating test files for ${Generator.globalData.englishName}`
       );
-      this.templateGenerator.generate("dataSourceTest");
-      this.templateGenerator.generate("resourceTest");
+      this.templateGenerator.generate("dataSourceTest", undefined, true);
+      this.templateGenerator.generate("resourceTest", undefined, true);
       console.info(
         `Created test files for ${Generator.globalData.englishName}`
       );
