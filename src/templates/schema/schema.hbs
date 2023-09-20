@@ -1,4 +1,4 @@
-package {{snakeName}}
+package {{snake packageName}}
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -9,24 +9,24 @@ import (
 )
 
 /*
-resource_genesycloud_{{snakeName}}_schema.go holds four functions within it:
+resource_genesycloud_{{snake packageName}}_schema.go holds four functions within it:
 
 1.  The registration code that registers the Datasource, Resource and Exporter for the package.
-2.  The resource schema definitions for the {{snakeName}} resource.
-3.  The datasource schema definitions for the {{snakeName}} datasource.
-4.  The resource exporter configuration for the {{snakeName}} exporter.
+2.  The resource schema definitions for the {{snake packageName}} resource.
+3.  The datasource schema definitions for the {{snake packageName}} datasource.
+4.  The resource exporter configuration for the {{snake packageName}} exporter.
 */
-const resourceName = "genesyscloud_{{snakeName}}"
+const resourceName = "genesyscloud_{{snake packageName}}"
 
 // SetRegistrar registers all of the resources, datasources and exporters in the package
 func SetRegistrar(regInstance registrar.Registrar) {
-	regInstance.RegisterResource(resourceName, Resource{{pascalName}}())
-	regInstance.RegisterDataSource(resourceName, DataSource{{pascalName}}())
-	regInstance.RegisterExporter(resourceName, {{pascalName}}Exporter())
+	regInstance.RegisterResource(resourceName, Resource{{pascal packageName}}())
+	regInstance.RegisterDataSource(resourceName, DataSource{{pascal packageName}}())
+	regInstance.RegisterExporter(resourceName, {{pascal packageName}}Exporter())
 }
 
-// Resource{{pascalName}} registers the genesyscloud_{{snakeName}} resource with Terraform
-func Resource{{pascalName}}() *schema.Resource {
+// Resource{{pascal packageName}} registers the genesyscloud_{{snake packageName}} resource with Terraform
+func Resource{{pascal packageName}}() *schema.Resource {
 	{{#unless skeletonStructure}}
 	{{#each nestedObjectSchemas}}
 	{{{this}}}
@@ -34,12 +34,12 @@ func Resource{{pascalName}}() *schema.Resource {
 	{{/each}}
 	{{/unless}}
 	return &schema.Resource{
-		Description: `Genesys Cloud {{englishName}}`,
+		Description: `Genesys Cloud {{english packageName}}`,
 
-		CreateContext: gcloud.CreateWithPooledClient(create{{pascalName}}),
-		ReadContext:   gcloud.ReadWithPooledClient(read{{pascalName}}),
-		UpdateContext: gcloud.UpdateWithPooledClient(update{{pascalName}}),
-		DeleteContext: gcloud.DeleteWithPooledClient(delete{{pascalName}}),
+		CreateContext: gcloud.CreateWithPooledClient(create{{pascal packageName}}),
+		ReadContext:   gcloud.ReadWithPooledClient(read{{pascal packageName}}),
+		UpdateContext: gcloud.UpdateWithPooledClient(update{{pascal packageName}}),
+		DeleteContext: gcloud.DeleteWithPooledClient(delete{{pascal packageName}}),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -47,34 +47,35 @@ func Resource{{pascalName}}() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			{{#unless skeletonStructure}}
 			{{#each properties}}
-			{{{this}}}
+			{{> schemaProperty}}
+			
 			{{/each}}
 			{{/unless}}
 		},
 	}
 }																																																											
 
-// {{pascalName}}Exporter returns the resourceExporter object used to hold the genesyscloud_{{snakeName}} exporter's config
-func {{pascalName}}Exporter() *resourceExporter.ResourceExporter {
+// {{pascal packageName}}Exporter returns the resourceExporter object used to hold the genesyscloud_{{snake packageName}} exporter's config
+func {{pascal packageName}}Exporter() *resourceExporter.ResourceExporter {
 	return &resourceExporter.ResourceExporter{
-		GetResourcesFunc: gcloud.GetAllWithPooledClient(getAllAuth{{pascalName}}s),
+		GetResourcesFunc: gcloud.GetAllWithPooledClient(getAllAuth{{pascal packageName}}s),
 		RefAttrs: map[string]*resourceExporter.RefAttrSettings{
 			// TODO: Add any reference attributes here
 		},
 	}
 }
 
-// DataSource{{pascalName}} registers the genesyscloud_{{snakeName}} data source
-func DataSource{{pascalName}}() *schema.Resource {
+// DataSource{{pascal packageName}} registers the genesyscloud_{{snake packageName}} data source
+func DataSource{{pascal packageName}}() *schema.Resource {
 	return &schema.Resource{
-		Description: `Genesys Cloud {{englishName}} data source. Select an {{englishName}} by name`,
-		ReadContext: gcloud.ReadWithPooledClient(dataSource{{pascalName}}Read),
+		Description: `Genesys Cloud {{english packageName}} data source. Select an {{english packageName}} by name`,
+		ReadContext: gcloud.ReadWithPooledClient(dataSource{{pascal packageName}}Read),
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Description: `{{englishName}} name`,
+				Description: `{{english packageName}} name`,
 				Type:        schema.TypeString,
 				Required:    true,
 			},

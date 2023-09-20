@@ -1,6 +1,6 @@
 import { Generator } from "./Generator";
 import { TemplateGenerator } from "./TemplateGenerator";
-import ObjectData from "../classes/ObjectData";
+import Resource from "../classes/Resource";
 
 // This class generates a terraform schema for the main object and all nested objects
 class SchemaGenerator extends Generator {
@@ -12,10 +12,8 @@ class SchemaGenerator extends Generator {
 
   // generates the terraform schema file
   public generate() {
+    console.info(`Creating schema file for ${Generator.config.mainObject}`);
     if (Generator.skeltonStructure || Generator.config.skeletonSchemaFile) {
-      console.info(
-        `Creating schema file structure for ${Generator.globalData.englishName}`
-      );
       this.templateGenerator.generate(
         "schema",
         {
@@ -23,17 +21,13 @@ class SchemaGenerator extends Generator {
         },
         true
       );
-      console.info(
-        `Created schema file structure for ${Generator.globalData.englishName}`
-      );
       return;
     }
 
-    console.info(`Creating schema file for ${Generator.config.mainObject}`);
     this.templateGenerator.generate(
       "schema",
       {
-        properties: this.generateProperties(Generator.parentObject),
+        ...Generator.parentObject,
         nestedObjectSchemas: this.generateNestedSchemas(
           Generator.parentObject,
           []
@@ -44,21 +38,16 @@ class SchemaGenerator extends Generator {
     console.info(`Created schema file for ${Generator.config.mainObject}`);
   }
 
-  private generateNestedSchemas(
-    obj: ObjectData,
-    tfSchemas: string[]
-  ): string[] {
+  private generateNestedSchemas(obj: Resource, tfSchemas: string[]): string[] {
     obj.getProperties().forEach((property) => {
       if (property.getNestedObject()) {
         tfSchemas = this.generateNestedSchemas(
-          property.getNestedObject()!.objectData,
+          property.getNestedObject()!,
           tfSchemas
         );
         const schemaData = {
-          objectName: property.getNestedObject()!.objectName,
-          properties: this.generateProperties(
-            property.getNestedObject()?.objectData!
-          ),
+          objectName: property.getNestedObject()!.getName(),
+          properties: this.generateProperties(property.getNestedObject()!),
         };
         tfSchemas.push(
           this.templateGenerator.generate("nestedSchema", schemaData)!
@@ -67,8 +56,8 @@ class SchemaGenerator extends Generator {
     });
     return tfSchemas;
   }
-  
-  private generateProperties(obj: ObjectData): string[] {
+
+  private generateProperties(obj: Resource): string[] {
     const tfProperties: string[] = [];
     obj.getProperties().forEach((property) => {
       tfProperties.push(

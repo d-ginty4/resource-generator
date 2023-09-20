@@ -1,5 +1,4 @@
-import ObjectData from "./ObjectData";
-import { camelToPascal, camelToSnake } from "../utils/variableRenames";
+import Resource from "./Resource";
 
 interface TFSchemaData {
   type?: string;
@@ -14,19 +13,15 @@ export default class PropertyData {
   private description: string = "";
   private required: boolean = false;
   private isStringArray?: boolean = false;
-  private nestedObject?: { objectName: string; objectData: ObjectData } =
-    undefined;
 
   // Generated data
-  private snakeName: string = "";
-  private pascalName: string = "";
   private flattenFunction?: string = undefined;
   private buildFunction?: string = undefined;
   private tfSchemaData?: TFSchemaData = undefined;
-
+  private nestedObject?: Resource = undefined;
   public setName(name: string): void {
     this.name = name;
-  } 
+  }
 
   public setType(type: string): void {
     this.type = type;
@@ -44,14 +39,11 @@ export default class PropertyData {
     this.isStringArray = isStringArray;
   }
 
-  public setNestedObject(
-    value: { objectName: string; objectData: ObjectData } | undefined
-  ) {
-    this.nestedObject = value;
+  public setNestedObject(objectData: Resource) {
+    this.nestedObject = objectData;
   }
 
   public generateData(): void {
-    this.createNames();
     this.createTFSchemaData();
     this.createUtilFunctions();
   }
@@ -60,9 +52,7 @@ export default class PropertyData {
     return this.type;
   }
 
-  public getNestedObject():
-    | { objectName: string; objectData: ObjectData }
-    | undefined {
+  public getNestedObject(): Resource | undefined {
     return this.nestedObject;
   }
 
@@ -87,13 +77,13 @@ export default class PropertyData {
         if (this.isStringArray) {
           schemaProperties.element = "&schema.Schema{Type: schema.TypeString}";
         } else {
-          schemaProperties.element = `${this.nestedObject?.objectName}Resource`;
+          schemaProperties.element = `${this.nestedObject?.getName()}Resource`;
         }
         break;
       case "object":
         schemaProperties.type = "schema.TypeList";
         schemaProperties.maxItems = 1;
-        schemaProperties.element = `${this.nestedObject?.objectName}Resource`;
+        schemaProperties.element = `${this.nestedObject?.getName()}Resource`;
         break;
       default:
         throw new Error(`Unknown type`);
@@ -101,19 +91,14 @@ export default class PropertyData {
     this.tfSchemaData = schemaProperties;
   }
 
-  private createNames(): void {
-    this.snakeName = camelToSnake(this.name);
-    this.pascalName = camelToPascal(this.name);
-  }
-
   private createUtilFunctions(): void {
     // Flatten function
     if (this.type === "object") {
-      this.flattenFunction = "flatten" + this.nestedObject?.objectName;
-      this.buildFunction = "build" + this.nestedObject?.objectName;
-    } else if (this.type === "array" && !this.isStringArray){
-      this.flattenFunction = "flatten" + this.nestedObject?.objectName + "s";
-      this.buildFunction = "build" + this.nestedObject?.objectName + "s";
+      this.flattenFunction = "flatten" + this.nestedObject?.getName();
+      this.buildFunction = "build" + this.nestedObject?.getName();
+    } else if (this.type === "array" && !this.isStringArray) {
+      this.flattenFunction = "flatten" + this.nestedObject?.getName() + "s";
+      this.buildFunction = "build" + this.nestedObject?.getName() + "s";
     }
   }
 }

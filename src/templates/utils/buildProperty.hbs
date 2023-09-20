@@ -1,12 +1,12 @@
 {{~#if (eq type "string")~}}
-resourcedata.BuildSDKStringValueIfNotNil(&sdk{{objectPascalName}}.{{pascalName}}, {{objectName}}sMap, "{{snakeName}}")
+resourcedata.BuildSDKStringValueIfNotNil(&sdk{{objectPascalName}}.{{pascal name}}, {{objectName}}sMap, "{{snake name}}")
 {{~else if (eq type "bool")~}}
-{{objectName}}.{{pascalName}} = platformclientv2.Bool(sdk{{objectPascalName}}sMap["{{snakeName}}"].(bool))
+{{objectName}}.{{pascal name}} = platformclientv2.Bool(sdk{{objectPascalName}}sMap["{{snake name}}"].(bool))
 {{~else if (eq type "integer")~}}
-sdk{{objectPascalName}}.{{pascalName}} = platformclientv2.Int({{objectName}}sMap["{{snakeName}}"].(int))
+sdk{{objectPascalName}}.{{pascal name}} = platformclientv2.Int({{objectName}}sMap["{{snake name}}"].(int))
 {{~else if isStringArray~}}
 // TODO: Handle string array property
 {{~else~}}
-resourcedata.BuildSDKInterfaceArrayValueIfNotNil(&sdk{{objectPascalName}}.{{pascalName}}, {{objectName}}sMap, "{{snakeName}}", {{buildFunction}})
+resourcedata.BuildSDKInterfaceArrayValueIfNotNil(&sdk{{objectPascalName}}.{{pascal name}}, {{objectName}}sMap, "{{snake name}}", {{buildFunction}})
 {{~/if~}}
 

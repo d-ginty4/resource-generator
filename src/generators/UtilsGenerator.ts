@@ -1,4 +1,4 @@
-import ObjectData from "../classes/ObjectData";
+import Resource from "../classes/Resource";
 import { goSdkName, pascalToCamel } from "../utils/variableRenames";
 import { Generator } from "./Generator";
 import { TemplateGenerator } from "./TemplateGenerator";
@@ -18,13 +18,13 @@ class UtilsGenerator extends Generator {
     Generator.parentObject.getProperties().forEach((property) => {
       if (property.getNestedObject()) {
         flattenFuncs = this.generateFlattenFunctions(
-          property.getNestedObject()?.objectName!,
-          property.getNestedObject()?.objectData!,
+          property.getNestedObject()?.getName()!,
+          property.getNestedObject()!,
           flattenFuncs
         );
         buildFuncs = this.generateBuildFunctions(
-          property.getNestedObject()?.objectName!,
-          property.getNestedObject()?.objectData!,
+          property.getNestedObject()?.getName()!,
+          property.getNestedObject()!,
           buildFuncs
         );
       }
@@ -32,10 +32,7 @@ class UtilsGenerator extends Generator {
     this.templateGenerator.generate(
       "utils",
       {
-        resourceDataFunc: this.templateGenerator.generate(
-          "createResourceData",
-          Generator.parentObject
-        ),
+        ...Generator.parentObject,
         flattenFuncs: flattenFuncs,
         buildFuncs: buildFuncs,
       },
@@ -45,7 +42,7 @@ class UtilsGenerator extends Generator {
 
   private generateBuildFunctions(
     objName: string,
-    objData: ObjectData,
+    objData: Resource,
     functions: string[]
   ): string[] {
     functions.push(
@@ -65,7 +62,7 @@ class UtilsGenerator extends Generator {
 
   private generateBuildProperties(
     objName: string,
-    objData: ObjectData,
+    objData: Resource,
     functions: string[]
   ): string[] {
     const buildProperties: string[] = [];
@@ -80,8 +77,8 @@ class UtilsGenerator extends Generator {
       );
       if (property.getNestedObject()) {
         functions = this.generateBuildFunctions(
-          property.getNestedObject()!.objectName,
-          property.getNestedObject()!.objectData,
+          property.getNestedObject()?.getName()!,
+          property.getNestedObject()!,
           functions
         );
       }
@@ -92,7 +89,7 @@ class UtilsGenerator extends Generator {
 
   private generateFlattenFunctions(
     objName: string,
-    objData: ObjectData,
+    objData: Resource,
     functions: string[]
   ): string[] {
     functions.push(
@@ -112,7 +109,7 @@ class UtilsGenerator extends Generator {
 
   private generateFlattenProperties(
     objName: string,
-    objData: ObjectData,
+    objData: Resource,
     functions: string[]
   ): string[] {
     const flattenProperties: string[] = [];
@@ -126,8 +123,8 @@ class UtilsGenerator extends Generator {
       );
       if (property.getNestedObject()) {
         functions = this.generateFlattenFunctions(
-          property.getNestedObject()!.objectName,
-          property.getNestedObject()!.objectData,
+          property.getNestedObject()?.getName()!,
+          property.getNestedObject()!,
           functions
         );
       }

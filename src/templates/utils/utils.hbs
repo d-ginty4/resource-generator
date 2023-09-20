@@ -1,4 +1,4 @@
-package {{snakeName}}
+package {{snake packageName}}
 
 import (
 	gcloud "terraform-provider-genesyscloud/genesyscloud"
@@ -9,13 +9,11 @@ import (
 )
 
 /*
-The resource_genesyscloud_{{snakeName}}_utils.go file contains various helper methods to marshal
+The resource_genesyscloud_{{snake packageName}}_utils.go file contains various helper methods to marshal
 and unmarshal data into formats consumable by Terraform and/or Genesys Cloud.
 */
 
-{{#if resourceDataFunc}}
-{{{resourceDataFunc}}}
-{{/if}}
+{{> resourceData}}
 
 {{#if buildFuncs}}
 {{#each buildFuncs}}

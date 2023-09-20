@@ -1,4 +1,4 @@
-package {{snakeName}}
+package {{snake packageName}}
 
 import (
 	"fmt"
@@ -13,11 +13,11 @@ import (
 )
 
 /*
-The resource_genesyscloud_{{snakeName}}_test.go contains all of the test cases for running the resource
-tests for {{snakeName}}.
+The resource_genesyscloud_{{snake packageName}}_test.go contains all of the test cases for running the resource
+tests for {{snake packageName}}.
 */
 
-func TestAccResource{{pascalName}}(t *testing.T) {
+func TestAccResource{{pascal packageName}}(t *testing.T) {
 	t.Parallel()
 	var ()
 
@@ -25,10 +25,10 @@ func TestAccResource{{pascalName}}(t *testing.T) {
 		PreCheck:          func() { gcloud.TestAccPreCheck(t) },
 		ProviderFactories: gcloud.GetProviderFactories(providerResources, providerDataSources),
 		Steps: []resource.TestStep{},
-		CheckDestroy: testVerify{{pascalName}}Destroyed,
+		CheckDestroy: testVerify{{pascal packageName}}Destroyed,
 	})
 }
 
-func testVerify{{pascalName}}Destroyed(state *terraform.State) error {
+func testVerify{{pascal packageName}}Destroyed(state *terraform.State) error {
 	return nil
 }

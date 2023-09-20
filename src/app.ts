@@ -11,12 +11,13 @@ import ProxyGenerator from "./generators/ProxyGenerator";
 import ResourceGenerator from "./generators/ResourceGenerator";
 import DataSourceGenerator from "./generators/DataSourceGenerator"; 
 import { TestGenerator } from "./generators/TestGenerator";
+import DocGenerator from "./generators/DocGenerator";
 
 // Read config file
 const yamlFileContent = fs.readFileSync("config.yml", "utf-8");
 const config: Config = yaml.load(yamlFileContent) as Config;
 
-// Create output folders
+// Create output folders if they don't exist
 createFolderIfNotExists("output");
 createFolderIfNotExists(`output/${config.package}`);
 
@@ -35,6 +36,15 @@ DataSourceGenerator.generate();
 // Generate test files
 const testGenerator = new TestGenerator(config.testFiles, config.initTest);
 testGenerator.generate();
+
+if (config.documentation){
+  createFolderIfNotExists(`output/${config.package}/examples`);
+  createFolderIfNotExists(`output/${config.package}/examples/resources`);
+  createFolderIfNotExists(`output/${config.package}/examples/data-sources`);
+
+  // Generate documentation files
+  DocGenerator.generate();
+}
 
 function createFolderIfNotExists(folderPath: string) {
   try {

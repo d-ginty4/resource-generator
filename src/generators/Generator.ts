@@ -1,51 +1,29 @@
-// packages
-import * as yaml from "js-yaml";
-import * as fs from "fs";
-
 // types
 import { Config } from "../types/Config";
-import {
-  Swagger,
-  SwaggerSchema,
-} from "../types/Swagger";
-import { GlobalData } from "../types/GlobalData";
+import { Swagger, SwaggerSchema } from "../types/Swagger";
 
-// helper functions
-import {
-  goSdkName,
-  pascalToCamel,
-  snakeToCamel,
-  snakeToEnglish,
-  snakeToPascal,
-} from "../utils/variableRenames";
 import PropertyData from "../classes/PropertyData";
-import ObjectData from "../classes/ObjectData";
+import Resource from "../classes/Resource";
+import readSwagger from "../utils/readSwagger";
+import readConfig from "../utils/readConfig";
 
 export abstract class Generator {
   // protected properties
   protected static config: Config;
   protected static swagger: Swagger;
-  protected static globalData: GlobalData;
-  protected static mainObject: SwaggerSchema;
   protected static skeltonStructure: boolean;
-  protected static parentObject: ObjectData;
+  protected static parentObject: Resource;
 
   // private properties
   private ignorableProperties: string[] = [];
 
   constructor() {
-    Generator.config = this.setConfig();
-    if (!Generator.config.operations) {
-      console.info("No operations given, generating skeleton structure");
+    Generator.config = readConfig();
+    Generator.swagger = readSwagger();
+    if (!Generator.config.operations || Generator.config.skeleton) {
+      console.info("Generating skeleton structure");
       Generator.skeltonStructure = true;
-    } else if (Generator.config.operations.length !== 5) {
-      throw new Error(
-        "There must be 5 operations. Create, Read, Update, Delete and Get all"
-      );
     }
-
-    Generator.swagger = this.setSwagger();
-    Generator.globalData = this.setGlobalData();
 
     const properties: string[] = [
       "id",
@@ -64,52 +42,23 @@ export abstract class Generator {
       this.ignorableProperties = properties;
     }
 
-    Generator.mainObject =
-      Generator.swagger.definitions[Generator.config.mainObject];
-    if (!Generator.mainObject) {
-      throw new Error(
-        `The main object ${Generator.config.mainObject} does not exist in the swagger file`
+    if (!Generator.parentObject) {
+      Generator.parentObject = this.setObject(
+        Generator.config.mainObject,
+        Generator.swagger.definitions[Generator.config.mainObject],
+        Generator.config.package
       );
     }
-
-    Generator.parentObject = this.setObject(Generator.mainObject);
   }
 
-  private setConfig(): Config {
-    const yamlFileContent = fs.readFileSync("config.yml", "utf-8");
-    const data: Config = yaml.load(yamlFileContent) as Config;
-    return data;
-  }
-
-  private setSwagger(): Swagger {
-    const jsonFileContent = fs.readFileSync("swagger.json", "utf-8");
-    const jsonData: Swagger = JSON.parse(jsonFileContent) as Swagger;
-    return jsonData;
-  }
-
-  private setGlobalData(): GlobalData {
-    const resourceName = Generator.config.package;
-    const data: GlobalData = {
-      englishName: snakeToEnglish(resourceName),
-      camelName: snakeToCamel(resourceName),
-      pascalName: snakeToPascal(resourceName),
-      snakeName: resourceName,
-      mainObject: Generator.config.mainObject,
-      mainObjectCamel: pascalToCamel(Generator.config.mainObject),
-      mainObjectGoSDK: goSdkName(Generator.config.mainObject),
-    };
-
-    return data;
-  }
-
-  private setObject(object: SwaggerSchema): ObjectData {
+  private setObject(name: string, object: SwaggerSchema, packageName?: string): Resource {
     const required = object.required || [];
     const properties = object.properties;
-    const tempObject = new ObjectData();
+    const tempObject = new Resource(name, packageName);
 
     if (properties) {
       for (const [propertyName, property] of Object.entries(properties)) {
-        if (this.isIgnorableProperty(propertyName)) {
+        if (this.ignorableProperties.includes(propertyName)) {
           continue;
         }
         const prop = new PropertyData();
@@ -129,32 +78,23 @@ export abstract class Generator {
           }
           if (property.items?.$ref) {
             const objName = property.items?.$ref.split("/")[2]!;
-            prop.setNestedObject({
-              objectName: objName,
-              objectData: this.setObject(
-                Generator.swagger.definitions[objName]
-              ),
-            });
+            prop.setNestedObject(
+              this.setObject(objName, Generator.swagger.definitions[objName])
+            );
           }
         } else if (prop.getType() === "object") {
           const objName = property.$ref?.split("/")[2]!;
 
-          prop.setNestedObject({
-            objectName: objName,
-            objectData: this.setObject(Generator.swagger.definitions[objName]),
-          });
+          prop.setNestedObject(
+            this.setObject(objName, Generator.swagger.definitions[objName])
+          );
         }
         prop.generateData();
-        
+
         tempObject.addProperty(prop);
       }
     }
 
     return tempObject;
-  }
-
-  // helpers
-  protected isIgnorableProperty(propertyName: string): boolean {
-    return this.ignorableProperties.includes(propertyName);
   }
 }

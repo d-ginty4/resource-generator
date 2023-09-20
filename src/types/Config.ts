@@ -6,6 +6,7 @@ export interface Config {
   initTest?: boolean;
   testFiles?: boolean;
   documentation?: boolean;
+  skeleton?: boolean;
   skeletonSchemaFile?: boolean;
   skeletonResourceFile?: boolean;
   skeletonProxyFile?: boolean;

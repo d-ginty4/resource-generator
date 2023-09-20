@@ -18,41 +18,37 @@ class ProxyGenerator extends Generator {
 
   // generates the proxy file
   public generate() {
+    console.info(`Creating proxy file for ${Generator.config.package}`);
+
     if (Generator.skeltonStructure || Generator.config.skeletonProxyFile) {
-      console.info(
-        `Creating proxy file structure for ${Generator.globalData.englishName}`
-      );
       this.templateGenerator.generate("proxy", {
         skeletonStructure: true,
       }, true);
-      console.info(
-        `Created proxy file structure for ${Generator.globalData.englishName}`
-      );
       return;
     }
 
-    console.info(`Creating proxy file for ${Generator.globalData.englishName}`);
-    // find the get/read operation
-    const getOperation = Generator.config.operations.find(
-      (operation) => operation.type === "read"
-    ) || { path: "" };
+    // get the first operation
+    const operation = Generator.config.operations[0]
 
     // create the go sdk api class name e.g. OutboundApi
-    const tag = Generator.swagger.paths[getOperation.path].get.tags[0];
-    const resourceApi = `${tag.replace(/\s+/g, "")}Api`;
+    const path = Generator.swagger.paths[operation.path]
+    const firstMethod = Object.keys(path)[0];
+    const tag = path[firstMethod].tags[0];
+    const resourceApi = `${tag.replace(/\s+/g, "")}Api`; // Remove all spaces
 
     if (resourceApi === "Api") {
       throw new Error("Unable to find resource's api");
     }
 
     const proxyData: ProxyData = {
+      ...Generator.parentObject,
       api: resourceApi,
       apiCamel: pascalToCamel(resourceApi),
     };
     this.getMethodNames(proxyData);
 
     this.templateGenerator.generate("proxy", proxyData, true);
-    console.info(`Created proxy file for ${Generator.globalData.englishName}`);
+    console.info(`Created proxy file for ${Generator.config.package}`);
   }
 
   // get the go sdk method name for each operation

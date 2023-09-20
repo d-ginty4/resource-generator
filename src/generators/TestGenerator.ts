@@ -15,23 +15,23 @@ export class TestGenerator extends Generator {
 
   public generate() {
     if (this.createInitTest) {
-      console.info(
-        `Creating init test file for ${Generator.globalData.englishName}`
-      );
-      this.templateGenerator.generate("initTest", undefined, true);
-      console.info(
-        `Created init test file for ${Generator.globalData.englishName}`
-      );
+      console.info(`Creating init test file for ${Generator.config.package}`);
+      this.templateGenerator.generate("initTest", Generator.parentObject, true);
+      console.info(`Created init test file for ${Generator.config.package}`);
     }
     if (this.createTestFiles) {
-      console.info(
-        `Creating test files for ${Generator.globalData.englishName}`
+      console.info(`Creating test files for ${Generator.config.package}`);
+      this.templateGenerator.generate(
+        "dataSourceTest",
+        Generator.parentObject,
+        true
       );
-      this.templateGenerator.generate("dataSourceTest", undefined, true);
-      this.templateGenerator.generate("resourceTest", undefined, true);
-      console.info(
-        `Created test files for ${Generator.globalData.englishName}`
+      this.templateGenerator.generate(
+        "resourceTest",
+        Generator.parentObject,
+        true
       );
+      console.info(`Created test files for ${Generator.config.package}`);
     }
   }
 }

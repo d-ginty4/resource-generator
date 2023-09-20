@@ -10,26 +10,21 @@ class DataSourceGenerator extends Generator {
   }
 
   public generate() {
+    console.info(`Creating data source file for ${Generator.config.package}`);
     if (Generator.skeltonStructure || Generator.config.skeletonDataSourceFile) {
-      console.info(
-        `Creating data source skeleton structure for ${Generator.globalData.englishName}`
+      this.templateGenerator.generate(
+        "dataSource",
+        {
+          skeletonStructure: true,
+        },
+        true
       );
-      this.templateGenerator.generate("dataSource", {
-        skeletonStructure: true,
-      }, true);
-      console.info(
-        `Created data source skeleton structure for ${Generator.globalData.englishName}`
-      );
+
       return;
     }
 
-    console.info(
-      `Creating data source file for ${Generator.globalData.englishName}`
-    );
-    this.templateGenerator.generate("dataSource", undefined, true);
-    console.info(
-      `Created data source file for ${Generator.globalData.englishName}`
-    );
+    this.templateGenerator.generate("dataSource", Generator.parentObject, true);
+    console.info(`Created data source file for ${Generator.config.package}`);
   }
 }
 

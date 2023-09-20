@@ -47,11 +47,8 @@ export class TemplateGenerator extends Generator {
     // Compile the template
     const template = handlebars.compile(templateText);
 
-    // combine the global data and the data passed in
-    const allData = { ...Generator.globalData, ...data };
-
     // generate the file from the template and data
-    const output = template(allData);
+    const output = template(data);
 
     if (!destination) {
       return output;
@@ -84,6 +81,8 @@ export class TemplateGenerator extends Generator {
         return `output/${packageName}/data_source_genesyscloud_${packageName}_test.go`
       case "resourceTest":
         return `output/${packageName}/resource_genesyscloud_${packageName}_test.go`
+      case "apis":
+        return `output/${packageName}/examples/resources/apis.md`
       default:
         throw new Error(`Unknown file type ${fileType}`);
     }
