@@ -1,7 +1,7 @@
 export interface Config {
   package: string;
   mainObject: string;
-  operations: Operation[];
+  operations?: Operation[];
   ignoreProperties?: string[];
   initTest?: boolean;
   testFiles?: boolean;
@@ -11,6 +11,11 @@ export interface Config {
   skeletonResourceFile?: boolean;
   skeletonProxyFile?: boolean;
   skeletonDataSourceFile?: boolean;
+  noSchema?: boolean;
+  noResource?: boolean;
+  noProxy?: boolean;
+  noDataSource?: boolean;
+  noUtils?: boolean;
 }
 
 export interface Operation {

@@ -21,7 +21,6 @@ export abstract class Generator {
     Generator.config = readConfig();
     Generator.swagger = readSwagger();
     if (!Generator.config.operations || Generator.config.skeleton) {
-      console.info("Generating skeleton structure");
       Generator.skeltonStructure = true;
     }
 
@@ -43,6 +42,10 @@ export abstract class Generator {
     }
 
     if (!Generator.parentObject) {
+      if (Generator.swagger.definitions[Generator.config.mainObject] === undefined){
+        throw new Error(`Unable to find main object ${Generator.config.mainObject} in swagger file`);
+      }
+
       Generator.parentObject = this.setObject(
         Generator.config.mainObject,
         Generator.swagger.definitions[Generator.config.mainObject],

@@ -15,15 +15,18 @@ class DataSourceGenerator extends Generator {
       this.templateGenerator.generate(
         "dataSource",
         {
+          ...Generator.parentObject,
           skeletonStructure: true,
         },
         true
       );
-
-      return;
+    } else {
+      this.templateGenerator.generate(
+        "dataSource",
+        Generator.parentObject,
+        true
+      );
     }
-
-    this.templateGenerator.generate("dataSource", Generator.parentObject, true);
     console.info(`Created data source file for ${Generator.config.package}`);
   }
 }

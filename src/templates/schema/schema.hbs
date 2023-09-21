@@ -35,7 +35,7 @@ func Resource{{pascal packageName}}() *schema.Resource {
 	{{/unless}}
 	return &schema.Resource{
 		Description: `Genesys Cloud {{english packageName}}`,
-
+		
 		CreateContext: gcloud.CreateWithPooledClient(create{{pascal packageName}}),
 		ReadContext:   gcloud.ReadWithPooledClient(read{{pascal packageName}}),
 		UpdateContext: gcloud.UpdateWithPooledClient(update{{pascal packageName}}),

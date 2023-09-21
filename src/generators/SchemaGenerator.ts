@@ -17,24 +17,24 @@ class SchemaGenerator extends Generator {
       this.templateGenerator.generate(
         "schema",
         {
+          ...Generator.parentObject,
           skeletonStructure: true,
         },
         true
       );
-      return;
+    } else {
+      this.templateGenerator.generate(
+        "schema",
+        {
+          ...Generator.parentObject,
+          nestedObjectSchemas: this.generateNestedSchemas(
+            Generator.parentObject,
+            []
+          ),
+        },
+        true
+      );
     }
-
-    this.templateGenerator.generate(
-      "schema",
-      {
-        ...Generator.parentObject,
-        nestedObjectSchemas: this.generateNestedSchemas(
-          Generator.parentObject,
-          []
-        ),
-      },
-      true
-    );
     console.info(`Created schema file for ${Generator.config.mainObject}`);
   }
 

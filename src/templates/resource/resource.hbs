@@ -49,6 +49,9 @@ func getAllAuth{{pascal packageName}}s(ctx context.Context, clientConfig *platfo
 
 // create{{pascal packageName}} is used by the {{snake packageName}} resource to create Genesys cloud {{english packageName}}
 func create{{pascal packageName}}(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	{{#unless createMethod}}
+	return nil
+	{{else}}
 	{{#if skeletonStructure}}
 	return nil
 	{{else}}
@@ -66,10 +69,14 @@ func create{{pascal packageName}}(ctx context.Context, d *schema.ResourceData, m
 	log.Printf("Created {{english packageName}} %s", *{{name}}.Id)
 	return read{{pascal packageName}}(ctx, d, meta)
 	{{/if}}
+	{{/unless}}
 }
 
 // read{{pascal packageName}} is used by the {{snake packageName}} resource to read an {{english packageName}} from genesys cloud
 func read{{pascal packageName}}(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	{{#unless readMethod}}
+	return nil
+	{{else}}
 	{{#if skeletonStructure}}
 	return nil
 	{{else}}
@@ -99,10 +106,14 @@ func read{{pascal packageName}}(ctx context.Context, d *schema.ResourceData, met
 		return cc.CheckState()
 	})
 	{{/if}}
+	{{/unless}}
 }
 
 // update{{pascal packageName}} is used by the {{snake packageName}} resource to update an {{english packageName}} in Genesys Cloud
 func update{{pascal packageName}}(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	{{#unless updateMethod}}
+	return nil
+	{{else}}
 	{{#if skeletonStructure}}
 	return nil
 	{{else}}
@@ -118,10 +129,14 @@ func update{{pascal packageName}}(ctx context.Context, d *schema.ResourceData, m
 	log.Printf("Updated {{english packageName}} %s", *{{name}}.Id)
 	return read{{pascal packageName}}(ctx, d, meta)
 	{{/if}}
+	{{/unless}}
 }
 
 // delete{{pascal packageName}} is used by the {{snake packageName}} resource to delete an {{english packageName}} from Genesys cloud
 func delete{{pascal packageName}}(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	{{#unless deleteMethod}}
+	return nil
+	{{else}}
 	{{#if skeletonStructure}}
 	return nil
 	{{else}}
@@ -147,4 +162,23 @@ func delete{{pascal packageName}}(ctx context.Context, d *schema.ResourceData, m
 		return retry.RetryableError(fmt.Errorf("{{english packageName}} %s still exists", d.Id()))
 	})
 	{{/if}}
+	{{/unless}}
 }
+
+{{#unless skeletonStructure}}
+{{#if noUtils}}
+{{> resourceData}}
+
+{{#if buildFuncs}}
+{{#each buildFuncs}}
+{{{this}}}
+{{/each}}
+{{/if}}
+
+{{#if flattenFuncs}}
+{{#each flattenFuncs}}
+{{{this}}}
+{{/each}}
+{{/if}}
+{{/if}}
+{{/unless}}

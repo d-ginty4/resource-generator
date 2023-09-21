@@ -13,6 +13,20 @@ class UtilsGenerator extends Generator {
 
   // generate utils file
   public generate() {
+    const { buildFuncs, flattenFuncs } = this.generateFunctions();
+
+    this.templateGenerator.generate(
+      "utils",
+      {
+        ...Generator.parentObject,
+        flattenFuncs: flattenFuncs,
+        buildFuncs: buildFuncs,
+      },
+      true
+    );
+  }
+
+  public generateFunctions(): { buildFuncs: string[]; flattenFuncs: string[] } {
     let flattenFuncs: string[] = [];
     let buildFuncs: string[] = [];
     Generator.parentObject.getProperties().forEach((property) => {
@@ -29,15 +43,8 @@ class UtilsGenerator extends Generator {
         );
       }
     });
-    this.templateGenerator.generate(
-      "utils",
-      {
-        ...Generator.parentObject,
-        flattenFuncs: flattenFuncs,
-        buildFuncs: buildFuncs,
-      },
-      true
-    );
+
+    return { flattenFuncs, buildFuncs };
   }
 
   private generateBuildFunctions(
@@ -72,7 +79,7 @@ class UtilsGenerator extends Generator {
         this.templateGenerator.generate("buildProperty", {
           ...property,
           objectName: pascalToCamel(objName),
-          objectPascalName: objName
+          objectPascalName: objName,
         })!
       );
       if (property.getNestedObject()) {
