@@ -100,5 +100,7 @@ export default class PropertyData {
       this.flattenFunction = "flatten" + this.nestedObject?.getName() + "s";
       this.buildFunction = "build" + this.nestedObject?.getName() + "s";
     }
+    this.flattenFunction = this.flattenFunction?.charAt(0).toUpperCase() + this.flattenFunction?.slice(1)!;
+    this.buildFunction = this.buildFunction?.charAt(0).toUpperCase() + this.buildFunction?.slice(1)!;
   }
 }
