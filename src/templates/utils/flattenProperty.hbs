@@ -1,6 +1,12 @@
 {{~#if flattenFunction~}}
-resourcedata.SetMapInterfaceArrayWithFuncIfNotNil({{objectName}}Map, "{{snake name}}", {{objectName}}.{{pascal name}}, {{flattenFunction}})
+resourcedata.SetMapInterfaceArrayWithFuncIfNotNil({{object}}Map, "{{snake name}}", {{object}}.{{pascal name}}, {{flattenFunction}})
 {{~else~}}
-resourcedata.SetMapValueIfNotNil({{objectName}}Map, "{{snake name}}", {{objectName}}.{{pascal name}})
+    {{#if isReference}}
+    resourcedata.SetMapReferenceValueIfNotNil({{object}}Map, "{{snake name}}_id", {{object}}.{{pascal name}})
+    {{else if isStringArray}}
+    resourcedata.SetMapStringArrayValueIfNotNil({{object}}Map, "{{snake name}}", {{object}}.{{pascal name}})
+    {{else}}
+    resourcedata.SetMapValueIfNotNil({{object}}Map, "{{snake name}}", {{object}}.{{pascal name}})
+    {{/if}}
 {{~/if~}}
 

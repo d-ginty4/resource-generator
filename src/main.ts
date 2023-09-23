@@ -2,7 +2,6 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as fsPromises from "fs/promises";
-import yargs from "yargs";
 
 // types
 import { Config } from "./types/Config";
@@ -16,9 +15,13 @@ import { TestGenerator } from "./generators/TestGenerator";
 import DocGenerator from "./generators/DocGenerator";
 import readConfig from "./utils/readConfig";
 
-async function main() {
+export default async function main() {
   // Read config file
-  const config: Config = readConfig();
+  const configFile = process.env.npm_config_config;
+  if (configFile === "true"){
+    throw new Error("No config file specified");
+  }
+  const config: Config = readConfig(configFile);
 
   // Create output folders if they don't exist
   createFolderIfNotExists("output");
@@ -42,7 +45,7 @@ async function main() {
     ResourceGenerator.generate();
   }
 
-  if (!config.noDataSource) {
+  if (!config.noDataSource && config.operations?.find((op) => op.type === "getAll")) {
     // Generate data source file
     DataSourceGenerator.generate();
   }
@@ -91,8 +94,3 @@ async function main() {
     }
   }
 }
-
-// Call the main function
-main().catch((error) => {
-  console.error("An error occurred:", error);
-});

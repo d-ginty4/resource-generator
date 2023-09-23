@@ -21,8 +21,10 @@ const resourceName = "genesyscloud_{{snake packageName}}"
 // SetRegistrar registers all of the resources, datasources and exporters in the package
 func SetRegistrar(regInstance registrar.Registrar) {
 	regInstance.RegisterResource(resourceName, Resource{{pascal packageName}}())
+	{{#unless noGetAll}}
 	regInstance.RegisterDataSource(resourceName, DataSource{{pascal packageName}}())
 	regInstance.RegisterExporter(resourceName, {{pascal packageName}}Exporter())
+	{{/unless}}
 }
 
 // Resource{{pascal packageName}} registers the genesyscloud_{{snake packageName}} resource with Terraform
@@ -55,6 +57,7 @@ func Resource{{pascal packageName}}() *schema.Resource {
 	}
 }																																																											
 
+{{#unless noGetAll}}
 // {{pascal packageName}}Exporter returns the resourceExporter object used to hold the genesyscloud_{{snake packageName}} exporter's config
 func {{pascal packageName}}Exporter() *resourceExporter.ResourceExporter {
 	return &resourceExporter.ResourceExporter{
@@ -82,3 +85,4 @@ func DataSource{{pascal packageName}}() *schema.Resource {
 		},
 	}
 }
+{{/unless}}

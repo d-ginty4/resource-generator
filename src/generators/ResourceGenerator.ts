@@ -37,7 +37,7 @@ class ResourceGenerator extends Generator {
       buildFuncs: [],
       flattenFuncs: [],
     };
-    if (Generator.config.noUtils) {
+    if (Generator.config.noUtils || !this.hasNestedObjects()) {
       utilData.noUtils = true;
       const { buildFuncs, flattenFuncs } = UtilsGenerator.generateFunctions();
       utilData.buildFuncs = buildFuncs;
@@ -59,13 +59,24 @@ class ResourceGenerator extends Generator {
     if (
       !Generator.skeltonStructure &&
       !Generator.config.skeletonResourceFile &&
-      !Generator.config.noUtils
+      !Generator.config.noUtils &&
+      this.hasNestedObjects()
     ) {
       // generate the utils file
       console.info(`Creating utils file for ${Generator.config.package}`);
       UtilsGenerator.generate();
       console.info(`Created utils file for ${Generator.config.package}`);
     }
+  }
+
+  private hasNestedObjects(): boolean {
+    for (const property of Generator.parentObject.getProperties()){
+      if (property.getNestedObject() !== undefined){
+        return true
+      }
+    }
+    
+    return false
   }
 }
 

@@ -13,11 +13,19 @@ class SchemaGenerator extends Generator {
   // generates the terraform schema file
   public generate() {
     console.info(`Creating schema file for ${Generator.config.mainObject}`);
+    let data = {
+      noGetAll: false,
+    }
+    if (!Generator.config.operations?.find((op) => op.type === "getAll")) {
+      data.noGetAll = true
+    }
+
     if (Generator.skeltonStructure || Generator.config.skeletonSchemaFile) {
       this.templateGenerator.generate(
         "schema",
         {
           ...Generator.parentObject,
+          ...data,
           skeletonStructure: true,
         },
         true
@@ -27,6 +35,7 @@ class SchemaGenerator extends Generator {
         "schema",
         {
           ...Generator.parentObject,
+          ...data,
           nestedObjectSchemas: this.generateNestedSchemas(
             Generator.parentObject,
             []

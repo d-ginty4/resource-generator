@@ -1,5 +1,4 @@
 import Resource from "../classes/Resource";
-import { goSdkName, pascalToCamel } from "../utils/variableRenames";
 import { Generator } from "./Generator";
 import { TemplateGenerator } from "./TemplateGenerator";
 
@@ -54,9 +53,7 @@ class UtilsGenerator extends Generator {
   ): string[] {
     functions.push(
       this.templateGenerator.generate("buildFunction", {
-        objectPascal: objName,
-        objectCamel: pascalToCamel(objName),
-        objectGoSdk: goSdkName(objName),
+        object: objName,
         buildProperties: this.generateBuildProperties(
           objName,
           objData,
@@ -78,8 +75,7 @@ class UtilsGenerator extends Generator {
       buildProperties.push(
         this.templateGenerator.generate("buildProperty", {
           ...property,
-          objectName: pascalToCamel(objName),
-          objectPascalName: objName,
+          object: objName
         })!
       );
       if (property.getNestedObject()) {
@@ -101,11 +97,9 @@ class UtilsGenerator extends Generator {
   ): string[] {
     functions.push(
       this.templateGenerator.generate("flattenFunction", {
-        objectPascal: objName,
-        objectCamel: pascalToCamel(objName),
-        objectGoSdk: goSdkName(objName),
+        object: objName,
         flattenProperties: this.generateFlattenProperties(
-          pascalToCamel(objName),
+          objName,
           objData,
           functions
         ),
@@ -125,7 +119,7 @@ class UtilsGenerator extends Generator {
       flattenProperties.push(
         this.templateGenerator.generate("flattenProperty", {
           ...property,
-          objectName: objName,
+          object: objName,
         })!
       );
       if (property.getNestedObject()) {

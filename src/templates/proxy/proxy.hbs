@@ -3,7 +3,9 @@ package {{snake packageName}}
 import (
 	{{#unless skeletonStructure}}
 	"fmt"
+	{{#if getAllMethod}}
 	"log"
+	{{/if}}
 	{{/unless}}
 	"context"
 	"github.com/mypurecloud/platform-client-sdk-go/v105/platformclientv2"
@@ -75,10 +77,10 @@ func new{{pascal packageName}}Proxy(clientConfig *platformclientv2.Configuration
 		{{/if}}
 		{{#if getAllMethod}}
 			getAll{{pascal packageName}}Attr:       getAll{{pascal packageName}}Fn,
-			get{{pascal packageName}}ByIdAttr:     	get{{pascal packageName}}ByIdFn,
+			get{{pascal packageName}}IdByNameAttr: 	get{{pascal packageName}}IdByNameFn,
 		{{/if}}
 		{{#if readMethod}}
-			get{{pascal packageName}}IdByNameAttr: 	get{{pascal packageName}}IdByNameFn,
+			get{{pascal packageName}}ByIdAttr:     	get{{pascal packageName}}ByIdFn,
 		{{/if}}
 		{{#if updateMethod}}
 			update{{pascal packageName}}Attr:      	update{{pascal packageName}}Fn,

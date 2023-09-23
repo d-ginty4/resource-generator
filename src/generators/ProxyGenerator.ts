@@ -1,4 +1,3 @@
-import { camelToPascal, pascalToCamel } from "../utils/variableRenames";
 import { Generator } from "./Generator";
 import { TemplateGenerator } from "./TemplateGenerator";
 
@@ -46,7 +45,7 @@ class ProxyGenerator extends Generator {
         ...Generator.parentObject,
         ...data,
         api: resourceApi,
-        apiCamel: pascalToCamel(resourceApi),
+        apiCamel: this.pascalToCamel(resourceApi),
       };
       this.getMethodNames(proxyData);
 
@@ -69,8 +68,15 @@ class ProxyGenerator extends Generator {
       const methodName =
         Generator.swagger.paths[operation.path][operation.method.toLowerCase()]
           .operationId;
-      proxyData[`${operation.type}Method`] = camelToPascal(methodName);
+      proxyData[`${operation.type}Method`] = this.camelToPascal(methodName);
     }
+  }
+  private camelToPascal(camelCaseString: string): string {
+    return camelCaseString.charAt(0).toUpperCase() + camelCaseString.slice(1);
+  }
+
+  private pascalToCamel(pascalCaseString: string): string {
+    return pascalCaseString.charAt(0).toLowerCase() + pascalCaseString.slice(1);
   }
 }
 

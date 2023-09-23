@@ -1,12 +1,16 @@
 {{~#if (eq type "string")~}}
-resourcedata.BuildSDKStringValueIfNotNil(&sdk{{objectPascalName}}.{{pascal name}}, {{objectName}}sMap, "{{snake name}}")
+    {{#if isReference}}
+    {{object}}.{{pascal name}} = &platformclientv2.Domainentityref{Id: platformclientv2.String({{object}}sMap["{{snake name}}_id"].(string))}
+    {{else}}
+    resourcedata.BuildSDKStringValueIfNotNil(&sdk{{pascal object}}.{{pascal name}}, {{object}}sMap, "{{snake name}}")
+    {{/if}}
 {{~else if (eq type "bool")~}}
-{{objectName}}.{{pascal name}} = platformclientv2.Bool(sdk{{objectPascalName}}sMap["{{snake name}}"].(bool))
+{{object}}.{{pascal name}} = platformclientv2.Bool(sdk{{pascal object}}sMap["{{snake name}}"].(bool))
 {{~else if (eq type "integer")~}}
-sdk{{objectPascalName}}.{{pascal name}} = platformclientv2.Int({{objectName}}sMap["{{snake name}}"].(int))
+sdk{{pascal object}}.{{pascal name}} = platformclientv2.Int({{object}}sMap["{{snake name}}"].(int))
 {{~else if isStringArray~}}
-// TODO: Handle string array property
+resourcedata.BuildSDKStringArrayValueIfNotNil(&sdk{{pascal object}}.{{pascal name}}, {{object}}sMap, "{{snake name}}")
 {{~else~}}
-resourcedata.BuildSDKInterfaceArrayValueIfNotNil(&sdk{{objectPascalName}}.{{pascal name}}, {{objectName}}sMap, "{{snake name}}", {{buildFunction}})
+resourcedata.BuildSDKInterfaceArrayValueIfNotNil(&sdk{{pascal object}}.{{pascal name}}, {{object}}sMap, "{{snake name}}", {{buildFunction}})
 {{~/if~}}
 

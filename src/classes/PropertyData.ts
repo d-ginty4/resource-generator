@@ -13,12 +13,15 @@ export default class PropertyData {
   private description: string = "";
   private required: boolean = false;
   private isStringArray?: boolean = false;
+  private isReference?: boolean = false;
 
   // Generated data
   private flattenFunction?: string = undefined;
   private buildFunction?: string = undefined;
   private tfSchemaData?: TFSchemaData = undefined;
+  
   private nestedObject?: Resource = undefined;
+
   public setName(name: string): void {
     this.name = name;
   }
@@ -44,6 +47,15 @@ export default class PropertyData {
   }
 
   public generateData(): void {
+    if (this.name === "division") {
+      this.name = "divisionId";
+      this.type = "string";
+      this.nestedObject = undefined;
+    } else if (this.nestedObject?.getName() === "domainEntityRef") {
+      this.type = "string";
+      this.isReference = true;
+      this.nestedObject = undefined;
+    }
     this.createTFSchemaData();
     this.createUtilFunctions();
   }
@@ -92,15 +104,19 @@ export default class PropertyData {
   }
 
   private createUtilFunctions(): void {
+    if (!this.nestedObject) {
+      return;
+    }
+    const pascalName =
+      this.nestedObject?.getName().charAt(0).toUpperCase() +
+      this.nestedObject?.getName().slice(1);
     // Flatten function
     if (this.type === "object") {
-      this.flattenFunction = "flatten" + this.nestedObject?.getName();
-      this.buildFunction = "build" + this.nestedObject?.getName();
+      this.flattenFunction = "flatten" + pascalName;
+      this.buildFunction = "build" + pascalName;
     } else if (this.type === "array" && !this.isStringArray) {
-      this.flattenFunction = "flatten" + this.nestedObject?.getName() + "s";
-      this.buildFunction = "build" + this.nestedObject?.getName() + "s";
+      this.flattenFunction = "flatten" + pascalName + "s";
+      this.buildFunction = "build" + pascalName + "s";
     }
-    this.flattenFunction = this.flattenFunction?.charAt(0).toUpperCase() + this.flattenFunction?.slice(1)!;
-    this.buildFunction = this.buildFunction?.charAt(0).toUpperCase() + this.buildFunction?.slice(1)!;
   }
 }

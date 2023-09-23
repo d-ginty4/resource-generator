@@ -1,3 +1,5 @@
+import fs from "fs";
+
 // types
 import { Config } from "../types/Config";
 import { Swagger, SwaggerSchema } from "../types/Swagger";
@@ -12,18 +14,26 @@ export abstract class Generator {
   protected static config: Config;
   protected static swagger: Swagger;
   protected static skeltonStructure: boolean;
-  protected static parentObject: Resource;
-
+  protected static parentObject: Resource; // An object representation of the resource
+  
   // private properties
   private ignorableProperties: string[] = [];
 
   constructor() {
-    Generator.config = readConfig();
+    // Read config file
+    const configFile = process.env.npm_config_config;
+    if (configFile === "true") {
+      throw new Error("No config file specified");
+    }
+    Generator.config = readConfig(configFile);
+
+    // Read swagger file
     Generator.swagger = readSwagger();
     if (!Generator.config.operations || Generator.config.skeleton) {
       Generator.skeltonStructure = true;
     }
 
+    // Set ignorable properties
     const properties: string[] = [
       "id",
       "dateCreated",
@@ -31,6 +41,7 @@ export abstract class Generator {
       "version",
       "createdBy",
       "selfUri",
+      "user",
     ];
     if (Generator.config.ignoreProperties) {
       this.ignorableProperties = [
@@ -41,9 +52,15 @@ export abstract class Generator {
       this.ignorableProperties = properties;
     }
 
+
+    // Generate parent object
     if (!Generator.parentObject) {
-      if (Generator.swagger.definitions[Generator.config.mainObject] === undefined){
-        throw new Error(`Unable to find main object ${Generator.config.mainObject} in swagger file`);
+      if (
+        Generator.swagger.definitions[Generator.config.mainObject] === undefined
+      ) {
+        throw new Error(
+          `Unable to find main object ${Generator.config.mainObject} in swagger file`
+        );
       }
 
       Generator.parentObject = this.setObject(
@@ -52,9 +69,23 @@ export abstract class Generator {
         Generator.config.package
       );
     }
+
+    if (process.env.npm_config_resource === "true") {
+      const data = JSON.stringify(Generator.parentObject, null, 2);
+      fs.writeFileSync("data.json", data);
+      console.log("Resource object written to data.json");
+      process.exit();
+    }
   }
 
-  private setObject(name: string, object: SwaggerSchema, packageName?: string): Resource {
+  private setObject(
+    name: string,
+    object: SwaggerSchema,
+    packageName?: string
+  ): Resource {
+    if (!object) {
+
+    }
     const required = object.required || [];
     const properties = object.properties;
     const tempObject = new Resource(name, packageName);
@@ -64,6 +95,7 @@ export abstract class Generator {
         if (this.ignorableProperties.includes(propertyName)) {
           continue;
         }
+
         const prop = new PropertyData();
         prop.setName(propertyName);
         property.type ? prop.setType(property.type) : prop.setType("object");
@@ -81,16 +113,20 @@ export abstract class Generator {
           }
           if (property.items?.$ref) {
             const objName = property.items?.$ref.split("/")[2]!;
-            prop.setNestedObject(
-              this.setObject(objName, Generator.swagger.definitions[objName])
-            );
+            if (objName !== name) {
+              prop.setNestedObject(
+                this.setObject(objName, Generator.swagger.definitions[objName])
+              );
+            }
           }
         } else if (prop.getType() === "object") {
           const objName = property.$ref?.split("/")[2]!;
 
-          prop.setNestedObject(
-            this.setObject(objName, Generator.swagger.definitions[objName])
-          );
+          if (objName !== name && this.isValidObject(objName)) {
+            prop.setNestedObject(
+              this.setObject(objName, Generator.swagger.definitions[objName])
+            );
+          }
         }
         prop.generateData();
 
@@ -99,5 +135,18 @@ export abstract class Generator {
     }
 
     return tempObject;
+  }
+
+  private isValidObject(objectName: string): boolean {
+    const object = Generator.swagger.definitions[objectName];
+    if (!object) {
+      return false;
+    }
+
+    if (!object.properties) {
+      return false;
+    }
+
+    return true
   }
 }
