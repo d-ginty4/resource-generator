@@ -1,5 +1,22 @@
 {{#if (eq type object)}}
+// build{{pascal object}} maps an []interface{} into a Genesys Cloud *platformclientv2.{{sdk object}}
+func build{{pascal object}}({{object}} []interface{}) *platformclientv2.{{sdk object}} {
+	if {{object}} == nil || len({{object}}) == 0 {
+		return nil
+	}
 
+	var sdk{{pascal object}} platformclientv2.{{sdk object}}
+	{{object}}sMap, ok := {{object}}[0].(map[string]interface{})
+	if !ok {
+		continue
+	}
+
+	{{#each buildProperties~}}
+	{{{this}}}
+	{{/each}}
+	
+	return &sdk{{object}}
+}
 {{else}}
 // build{{pascal object}}s maps an []interface{} into a Genesys Cloud *[]platformclientv2.{{sdk object}}
 func build{{pascal object}}s({{object}}s []interface{}) *[]platformclientv2.{{sdk object}} {

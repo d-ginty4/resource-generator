@@ -1,5 +1,18 @@
 {{#if (eq type object)}}
+// flatten{{pascal object}} maps a Genesys Cloud *platformclientv2.{{sdk object}} into a []interface{}
+func flatten{{pascal object}}({{object}} *platformclientv2.{{sdk object}}) []interface{} {
+	if {{object}} == nil {
+		return nil
+	}
 
+	{{object}}sMap := make(map[string]interface{})
+
+	{{#each flattenProperties~}}
+	{{{this}}}
+	{{/each}}
+	
+	return []interface{}{ {{object}}sMap }
+}
 {{else}}
 // flatten{{pascal object}}s maps a Genesys Cloud *[]platformclientv2.{{sdk object}} into a []interface{}
 func flatten{{pascal object}}s({{object}}s *[]platformclientv2.{{sdk object}}) []interface{} {

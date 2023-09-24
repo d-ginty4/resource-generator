@@ -81,6 +81,9 @@ export default class PropertyData {
       case "integer":
         schemaProperties.type = "schema.TypeInt";
         break;
+      case "number":
+        schemaProperties.type = "schema.TypeFloat";
+        break;
       case "boolean":
         schemaProperties.type = "schema.TypeBool";
         break;
@@ -98,7 +101,7 @@ export default class PropertyData {
         schemaProperties.element = `${this.nestedObject?.getName()}Resource`;
         break;
       default:
-        throw new Error(`Unknown type`);
+        throw new Error(`Unknown type ${this.type}`);
     }
     this.tfSchemaData = schemaProperties;
   }

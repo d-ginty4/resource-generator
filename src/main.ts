@@ -30,22 +30,22 @@ export default async function main() {
   // delete all files in package folder
   await deleteFolderContent(`output/${config.package}`);
 
-  if (!config.noSchema) {
+  if (!config.noSchemaFile) {
     // Generate schema file
     SchemaGenerator.generate();
   }
 
-  if (!config.noProxy) {
+  if (!config.noProxyFile) {
     // Generate proxy file
     ProxyGenerator.generate();
   }
 
-  if (!config.noResource) {
+  if (!config.noResourceFile) {
     // Generate resource file
     ResourceGenerator.generate();
   }
 
-  if (!config.noDataSource && config.operations?.find((op) => op.type === "getAll")) {
+  if (!config.noDataSourceFile && config.operations?.find((op) => op.type === "getAll")) {
     // Generate data source file
     DataSourceGenerator.generate();
   }

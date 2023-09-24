@@ -37,7 +37,7 @@ class ResourceGenerator extends Generator {
       buildFuncs: [],
       flattenFuncs: [],
     };
-    if (Generator.config.noUtils || !this.hasNestedObjects()) {
+    if (Generator.config.noUtilsFile || !this.hasNestedObjects()) {
       utilData.noUtils = true;
       const { buildFuncs, flattenFuncs } = UtilsGenerator.generateFunctions();
       utilData.buildFuncs = buildFuncs;
@@ -59,7 +59,7 @@ class ResourceGenerator extends Generator {
     if (
       !Generator.skeltonStructure &&
       !Generator.config.skeletonResourceFile &&
-      !Generator.config.noUtils &&
+      !Generator.config.noUtilsFile &&
       this.hasNestedObjects()
     ) {
       // generate the utils file

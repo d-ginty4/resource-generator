@@ -189,3 +189,5 @@ ignoreProperties:
 
 - Object Array properties are defined as lists in the schema. Nested object properties are defined as lists with MaxItems=1
 - All data sources will use the name property
+
+The resource generator is a best attempt to automate the generation of Genesys cloud resources but like most things it is not perfect and will not be able to generate all resources. If you wish to make a contribution to the generator, PR are very welcome.

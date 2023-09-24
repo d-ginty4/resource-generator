@@ -43,11 +43,11 @@ function validateConfig(data: any) {
     "skeletonResourceFile",
     "skeletonProxyFile",
     "skeletonDataSourceFile",
-    "noSchema",
-    "noResource",
-    "noProxy",
-    "noDataSource",
-    "noUtils",
+    "noSchemaFile",
+    "noResourceFile",
+    "noProxyFile",
+    "noDataSourceFile",
+    "noUtilsFile",
   ]);
 
   // Check if all required properties are present

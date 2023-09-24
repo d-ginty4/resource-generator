@@ -18,6 +18,7 @@ export abstract class Generator {
   
   // private properties
   private ignorableProperties: string[] = [];
+  private visitedObjects: string[] = [];
 
   constructor() {
     // Read config file
@@ -41,7 +42,6 @@ export abstract class Generator {
       "version",
       "createdBy",
       "selfUri",
-      "user",
     ];
     if (Generator.config.ignoreProperties) {
       this.ignorableProperties = [
@@ -81,7 +81,7 @@ export abstract class Generator {
   private setObject(
     name: string,
     object: SwaggerSchema,
-    packageName?: string
+    packageName?: string,
   ): Resource {
     if (!object) {
 
@@ -96,6 +96,7 @@ export abstract class Generator {
           continue;
         }
 
+        
         const prop = new PropertyData();
         prop.setName(propertyName);
         property.type ? prop.setType(property.type) : prop.setType("object");
@@ -113,16 +114,19 @@ export abstract class Generator {
           }
           if (property.items?.$ref) {
             const objName = property.items?.$ref.split("/")[2]!;
-            if (objName !== name) {
+
+            if (objName !== name && this.isValidObject(objName) && !this.visitedObjects.includes(objName)) {
+              this.visitedObjects.push(objName);
               prop.setNestedObject(
-                this.setObject(objName, Generator.swagger.definitions[objName])
+                this.setObject(objName,Generator.swagger.definitions[objName])
               );
             }
           }
         } else if (prop.getType() === "object") {
           const objName = property.$ref?.split("/")[2]!;
 
-          if (objName !== name && this.isValidObject(objName)) {
+          if (objName !== name && this.isValidObject(objName) && !this.visitedObjects.includes(objName)) {
+            this.visitedObjects.push(objName);
             prop.setNestedObject(
               this.setObject(objName, Generator.swagger.definitions[objName])
             );
