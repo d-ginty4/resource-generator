@@ -11,11 +11,11 @@ export interface Config {
   skeletonResourceFile?: boolean;
   skeletonProxyFile?: boolean;
   skeletonDataSourceFile?: boolean;
-  noSchema?: boolean;
-  noResource?: boolean;
-  noProxy?: boolean;
-  noDataSource?: boolean;
-  noUtils?: boolean;
+  noSchemaFile?: boolean;
+  noResourceFile?: boolean;
+  noProxyFile?: boolean;
+  noDataSourceFile?: boolean;
+  noUtilsFile?: boolean;
 }
 
 export interface Operation {
