@@ -1,4 +1,4 @@
-package {{snakeName}}
+package {{snake packageName}}
 
 import (
 	"context"
@@ -8,37 +8,36 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 		
 	gcloud "terraform-provider-genesyscloud/genesyscloud"
 	{{/unless}}
 )
 /*
-   The data_source_genesyscloud_{{snakeName}}.go contains the data source implementation
+   The data_source_genesyscloud_{{snake packageName}}.go contains the data source implementation
    for the resource.
 */
 
-// dataSource{{pascalName}}Read retrieves by name the id in question
-func dataSource{{pascalName}}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+// dataSource{{pascal packageName}}Read retrieves by name the id in question
+func dataSource{{pascal packageName}}Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	{{#unless skeletonStructure}}
 	sdkConfig := meta.(*gcloud.ProviderMeta).ClientConfig
-	proxy := new{{pascalName}}Proxy(sdkConfig)
+	proxy := new{{pascal packageName}}Proxy(sdkConfig)
 
 	name := d.Get("name").(string)
 
 	return gcloud.WithRetries(ctx, 15*time.Second, func() *retry.RetryError {
-		{{mainObjectCamel}}Id, retryable, err := proxy.get{{pascalName}}IdByName(ctx, name)
+		{{name}}Id, retryable, err := proxy.get{{pascal packageName}}IdByName(ctx, name)
 
 		if err != nil && !retryable {
-			return retry.NonRetryableError(fmt.Errorf("Error {{englishName}} %s: %s", name, err))
+			return retry.NonRetryableError(fmt.Errorf("Error searching {{english packageName}} %s: %s", name, err))
 		}
 
 		if retryable {
-			return retry.RetryableError(fmt.Errorf("No {{englishName}} found with name %s", name))
+			return retry.RetryableError(fmt.Errorf("No {{english packageName}} found with name %s", name))
 		}
 
-		d.SetId({{mainObjectCamel}}Id)
+		d.SetId({{name}}Id)
 		return nil
 	})
 	{{/unless}}

@@ -4,8 +4,8 @@
   "description": "",
   "main": "app.ts",
   "scripts": {
-    "start": "npx ts-node src/app.ts && gofmt -w output/",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "ts-node app.ts $npm_config_config $npm_config_resource && gofmt -w output/",
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
@@ -16,6 +16,11 @@
   },
   "devDependencies": {
     "@types/handlebars": "^4.1.0",
-    "@types/js-yaml": "^4.0.5"
+    "@types/jest": "^29.5.5",
+    "@types/js-yaml": "^4.0.5",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
   }
 }

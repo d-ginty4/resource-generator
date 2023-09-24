@@ -1,3 +1,6 @@
 output/
 node_modules/
-config.yml
+*.yml
+*.yaml
+.*
+data.json

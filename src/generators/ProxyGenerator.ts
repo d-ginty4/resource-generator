@@ -1,69 +1,83 @@
-import templates from "../utils/templates";
-import { camelToPascal, pascalToCamel } from "../utils/variableRenames";
 import { Generator } from "./Generator";
+import { TemplateGenerator } from "./TemplateGenerator";
 
-interface ProxyData {
-  api: string; // e.g. OutboundApi
-  apiCamel: string; // e.g. outboundApi
-  [method: string]: string; // e.g. readMethod: GetOutboundCallabletimeset
-}
-
-export class ProxyGenerator extends Generator {
-  template: string;
-  outputLocation: string;
+class ProxyGenerator extends Generator {
+  templateGenerator: TemplateGenerator;
 
   constructor() {
     super();
-    this.template = templates.get("proxy")!;
-    this.outputLocation = this.getOutputLocation("proxy")
+    this.templateGenerator = new TemplateGenerator();
   }
 
   // generates the proxy file
   public generate() {
+    console.info(`Creating proxy file for ${Generator.config.package}`);
+
+    let data: { skeletonStructure: boolean } = { skeletonStructure: false };
     if (Generator.skeltonStructure || Generator.config.skeletonProxyFile) {
-      console.info(
-        `Creating proxy file structure for ${Generator.globalData.englishName}`
-      );
-      this.generateFile(this.template, this.outputLocation, {
-        skeletonStructure: true,
-      });
-      console.info(
-        `Created proxy file structure for ${Generator.globalData.englishName}`
-      );
-      return;
+      data.skeletonStructure = true;
     }
 
-    console.info(`Creating proxy file for ${Generator.globalData.englishName}`);
-    // find the get/read operation
-    const getOperation = Generator.config.operations.find(
-      (operation) => operation.type === "read"
-    ) || { path: "" };
+    if (!Generator.config.operations) {
+      this.templateGenerator.generate(
+        "proxy",
+        {
+          ...Generator.parentObject,
+          ...data,
+        },
+        true
+      );
+    } else {
+      // get the first operation
+      const operation = Generator.config.operations[0];
 
-    // create the go sdk api class name e.g. OutboundApi
-    const tag = Generator.swagger.paths[getOperation.path].get.tags[0];
-    const resourceApi = `${tag.replace(/\s+/g, "")}Api`;
+      // create the go sdk api class name e.g. OutboundApi
+      const path = Generator.swagger.paths[operation.path];
+      const firstMethod = Object.keys(path)[0];
+      const tag = path[firstMethod].tags[0];
+      const resourceApi = `${tag.replace(/\s+/g, "")}Api`; // Remove all spaces
 
-    if (resourceApi === "Api") {
-      throw new Error("Unable to find resource's api");
+      if (resourceApi === "Api") {
+        throw new Error("Unable to find resource's api");
+      }
+
+      const proxyData: any = {
+        ...Generator.parentObject,
+        ...data,
+        api: resourceApi,
+        apiCamel: this.pascalToCamel(resourceApi),
+      };
+      this.getMethodNames(proxyData);
+
+      this.templateGenerator.generate("proxy", proxyData, true);
     }
-
-    const proxyData: ProxyData = {
-      api: resourceApi,
-      apiCamel:pascalToCamel(resourceApi),
-    };
-    this.getMethodNames(proxyData);
-
-    this.generateFile(this.template, this.outputLocation, proxyData);
-    console.info(`Created proxy file for ${Generator.globalData.englishName}`);
+    console.info(`Created proxy file for ${Generator.config.package}`);
   }
 
   // get the go sdk method name for each operation
-  private getMethodNames(proxyData: ProxyData) {
+  private getMethodNames(proxyData: any) {
+    if (!Generator.config.operations) {
+      return;
+    }
     for (const operation of Generator.config.operations) {
+      if (Generator.swagger.paths[operation.path] === undefined) {
+        throw new Error(
+          `Unable to find path ${operation.path} in swagger file`
+        );
+      }
       const methodName =
         Generator.swagger.paths[operation.path][operation.method.toLowerCase()]
           .operationId;
-      proxyData[`${operation.type}Method`] = camelToPascal(methodName);
+      proxyData[`${operation.type}Method`] = this.camelToPascal(methodName);
     }
   }
+  private camelToPascal(camelCaseString: string): string {
+    return camelCaseString.charAt(0).toUpperCase() + camelCaseString.slice(1);
+  }
+
+  private pascalToCamel(pascalCaseString: string): string {
+    return pascalCaseString.charAt(0).toLowerCase() + pascalCaseString.slice(1);
+  }
 }
+
+export default new ProxyGenerator();

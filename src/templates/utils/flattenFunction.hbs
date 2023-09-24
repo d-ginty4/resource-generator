@@ -1,19 +1,36 @@
-// flatten{{objectPascal}}s maps a Genesys Cloud *[]platformclientv2.{{objectGoSDK}} into a []interface{}
-func flatten{{objectPascal}}s({{objectCamel}}s *[]platformclientv2.{{objectGoSDK}}) []interface{} {
-	if len(*{{objectCamel}}s) == 0 {
+{{#if (eq type object)}}
+// flatten{{pascal object}} maps a Genesys Cloud *platformclientv2.{{sdk object}} into a []interface{}
+func flatten{{pascal object}}({{object}} *platformclientv2.{{sdk object}}) []interface{} {
+	if {{object}} == nil {
 		return nil
 	}
 
-	var {{objectCamel}}List []interface{}
-	for _, {{objectCamel}} := range *{{objectCamel}}s {
-		{{objectCamel}}Map := make(map[string]interface{})
+	{{object}}sMap := make(map[string]interface{})
 
-		{{#each flattenProperties}}
+	{{#each flattenProperties~}}
+	{{{this}}}
+	{{/each}}
+	
+	return []interface{}{ {{object}}sMap }
+}
+{{else}}
+// flatten{{pascal object}}s maps a Genesys Cloud *[]platformclientv2.{{sdk object}} into a []interface{}
+func flatten{{pascal object}}s({{object}}s *[]platformclientv2.{{sdk object}}) []interface{} {
+	if len(*{{object}}s) == 0 {
+		return nil
+	}
+
+	var {{object}}List []interface{}
+	for _, {{object}} := range *{{object}}s {
+		{{object}}Map := make(map[string]interface{})
+
+		{{#each flattenProperties~}}
 		{{{this}}}
 		{{/each}}
 		
-		{{objectCamel}}List = append({{objectCamel}}List, {{objectCamel}}Map)
+		{{object}}List = append({{object}}List, {{object}}Map)
 	}
 
-	return {{objectCamel}}List
+	return {{object}}List
 }
+{{/if}}

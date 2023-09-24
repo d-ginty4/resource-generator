@@ -1,119 +1,83 @@
-import {
-  camelToPascal, camelToSnake, pascalToCamel,
-} from "../utils/variableRenames";
 import { Generator } from "./Generator";
-import { SwaggerSchemaProperty } from "../types/Swagger";
-import templates from "../utils/templates";
-import { UtilsGenerator } from "./UtilsGenerator";
+import { TemplateGenerator } from "./TemplateGenerator";
+import UtilsGenerator from "./UtilsGenerator";
 
-export class ResourceGenerator extends Generator {
-  template: string;
-  outputLocation: string;
+interface UtilsData {
+  noUtils: boolean;
+  buildFuncs: string[];
+  flattenFuncs: string[];
+}
+
+class ResourceGenerator extends Generator {
+  templateGenerator: TemplateGenerator;
 
   constructor() {
     super();
-    this.template = templates.get("resource")!
-    this.outputLocation = this.getOutputLocation("resource");
+    this.templateGenerator = new TemplateGenerator();
   }
 
   // generate the resource file
   public generate() {
-    if (Generator.skeltonStructure || Generator.config.skeletonResourceFile) {
-      console.info(
-        `Creating resource file structure for ${Generator.globalData.englishName}`
-      );
-      this.generateFile(this.template, this.outputLocation, {
-        skeletonStructure: true,
-      });
-      console.info(
-        `Created resource file structure for ${Generator.globalData.englishName}`
-      );
-      return;
-    }
+    console.info(`Creating resource file for ${Generator.config.package}`);
 
-    console.info(`Creating resource file for ${Generator.globalData.englishName}`);
-    const resourceData = {
-      readProperties: this.generateReadStatements(),
-    };
-
-    this.generateFile(this.template, this.outputLocation, resourceData);
-    console.info(
-      `Created resource file for ${Generator.globalData.englishName}`
-    );
-
-    if (!Generator.skeltonStructure || !Generator.config.skeletonResourceFile) {
-      // generate the utils file
-      const utilsGenerator = new UtilsGenerator();
-      utilsGenerator.generate();
-    }
-  }
-
-  // generate the statements needed read the properties of the main object
-  private generateReadStatements(): string[] {
-    const mainObject = Generator.mainObject;
-    const properties = mainObject.properties;
-
-    const readStatements: string[] = [];
-
-    if (properties) {
-      for (const [propertyName, property] of Object.entries(properties)) {
-        if (!this.isIgnorableProperty(propertyName)) {
-          readStatements.push(this.handleProperty(propertyName, property));
-        }
+    let presentMethods: { [key: string]: boolean } = {};
+    if (Generator.config.operations) {
+      for (const operation of Generator.config.operations) {
+        presentMethods[`${operation.type}Method`] = true;
       }
     }
 
-    return readStatements;
-  }
+    let data: { skeletonStructure: boolean } = { skeletonStructure: false };
+    if (Generator.skeltonStructure || Generator.config.skeletonResourceFile) {
+      data.skeletonStructure = true;
+    }
 
-  // generate the appropriate read statement based on the property type
-  private handleProperty(
-    name: string,
-    property: SwaggerSchemaProperty
-  ): string {
-    // evaluate the property type 
-    switch (this.evaluatePropertyType(name, property)) {
-      case "basic type":
-        return this.generateReadStatement(name);
-      case "nested object":
-        if (property.items?.$ref) {
-          const nestedObjectName = property.items.$ref.split("/")[2];
-          return this.generateReadStatement(
-            name,
-            `flatten${camelToPascal(nestedObjectName)}`
-          );
-        }
-        throw new Error(`Unable to handle nested object ${name}: ${property}`);
-      case "string array":
-        
-      case "nested object array":
-        if (property.items?.$ref) {
-          const nestedObjectName = property.items.$ref.split("/")[2];
-          return this.generateReadStatement(
-            name,
-            `flatten${camelToPascal(nestedObjectName)}s`
-          );
-        }
-        throw new Error(`Unable to handle nested object array ${name}: ${property}`);
-      default:
-        throw new Error(`Unknown property ${name}: ${property}`);
+    let utilData: UtilsData = {
+      noUtils: false,
+      buildFuncs: [],
+      flattenFuncs: [],
+    };
+    if (Generator.config.noUtilsFile || !this.hasNestedObjects()) {
+      utilData.noUtils = true;
+      const { buildFuncs, flattenFuncs } = UtilsGenerator.generateFunctions();
+      utilData.buildFuncs = buildFuncs;
+      utilData.flattenFuncs = flattenFuncs;
+    }
+
+    this.templateGenerator.generate(
+      "resource",
+      {
+        ...Generator.parentObject,
+        ...data,
+        ...utilData,
+        ...presentMethods,
+      },
+      true
+    );
+    console.info(`Created resource file for ${Generator.config.package}`);
+
+    if (
+      !Generator.skeltonStructure &&
+      !Generator.config.skeletonResourceFile &&
+      !Generator.config.noUtilsFile &&
+      this.hasNestedObjects()
+    ) {
+      // generate the utils file
+      console.info(`Creating utils file for ${Generator.config.package}`);
+      UtilsGenerator.generate();
+      console.info(`Created utils file for ${Generator.config.package}`);
     }
   }
 
-  // generate the read statement for a property using the template
-  private generateReadStatement(
-    property: string,
-    readFunction?: string
-  ): string {
-    const readPropertyTemplate = templates.get("readProperty")!
-    const objectName = pascalToCamel(Generator.config.mainObject);
-    const readPropertyData = {
-      property: camelToSnake(property),
-      objectName: objectName,
-      objectProperty: camelToPascal(property),
-      readFunction: readFunction,
-    };
-
-    return this.generateTemplateStr(readPropertyTemplate, readPropertyData);
+  private hasNestedObjects(): boolean {
+    for (const property of Generator.parentObject.getProperties()){
+      if (property.getNestedObject() !== undefined){
+        return true
+      }
+    }
+    
+    return false
   }
 }
+
+export default new ResourceGenerator();

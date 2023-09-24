@@ -1,19 +1,18 @@
-{{#if (eq type "string")}}
-resourcedata.BuildSDKStringValueIfNotNil(&sdk{{objectPascalName}}.{{objectProperty}}, {{objectName}}sMap, "{{property}}")
-{{else}}
-{{#if (eq type "bool")}}
-{{objectName}}.{{objectProperty}} = platformclientv2.Bool(sdk{{objectPascalName}}sMap["{{property}}"].(bool))
-{{else}}
-{{#if (eq type "integer")}}
-sdk{{objectPascalName}}.{{objectProperty}} = platformclientv2.Int({{objectName}}sMap["{{property}}"].(int))
-{{else}}
-{{#if (eq type "nested object")}}
-resourcedata.BuildSDKInterfaceArrayValueIfNotNil(&sdk{{objectPascalName}}.{{objectProperty}}, {{objectName}}Map, "{{property}}", {{nestedObjectFunc}})
-{{else}}
-{{#if (eq type "nested object array")}}
-resourcedata.BuildSDKInterfaceArrayValueIfNotNil(&sdk{{objectPascalName}}.{{objectProperty}}, {{objectName}}sMap, "{{property}}", {{nestedObjectFunc}})
-{{/if}}
-{{/if}}
-{{/if}}
-{{/if}}
-{{/if}}
+{{~#if (eq type "string")~}}
+    {{#if isReference}}
+    {{object}}.{{pascal name}} = &platformclientv2.Domainentityref{Id: platformclientv2.String({{object}}sMap["{{snake name}}_id"].(string))}
+    {{else}}
+    resourcedata.BuildSDKStringValueIfNotNil(&sdk{{pascal object}}.{{pascal name}}, {{object}}sMap, "{{snake name}}")
+    {{/if}}
+{{~else if (eq type "bool")~}}
+{{object}}.{{pascal name}} = platformclientv2.Bool(sdk{{pascal object}}sMap["{{snake name}}"].(bool))
+{{~else if (eq type "integer")~}}
+sdk{{pascal object}}.{{pascal name}} = platformclientv2.Int({{object}}sMap["{{snake name}}"].(int))
+{{~else if (eq type "number")~}}
+// TODO: Handle number property
+{{~else if isStringArray~}}
+resourcedata.BuildSDKStringArrayValueIfNotNil(&sdk{{pascal object}}.{{pascal name}}, {{object}}sMap, "{{snake name}}")
+{{~else~}}
+resourcedata.BuildSDKInterfaceArrayValueIfNotNil(&sdk{{pascal object}}.{{pascal name}}, {{object}}sMap, "{{snake name}}", {{buildFunction}})
+{{~/if~}}
+

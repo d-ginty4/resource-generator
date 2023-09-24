@@ -1,0 +1,25 @@
+// get{{pascal packageName}}FromResourceData maps data from schema ResourceData object to a platformclientv2.{{sdk name}}
+func get{{pascal packageName}}FromResourceData(d *schema.ResourceData) platformclientv2.{{sdk name}} {
+	return platformclientv2.{{sdk name}}{
+        {{#each properties as |property|}}{{~#with property~}}
+        {{#if (eq name "division_id")}}
+                Division: &platformclientv2.Writabledivision{Id: platformclientv2.String(d.Get("division_id").(string))},
+        {{else if (eq type "string")}}
+                {{#if isReference}}
+                {{pascal name}}: gcloud.BuildSdkDomainEntityRef(d, "{{snake name}}_id"),
+                {{else}}
+                {{pascal name}}: platformclientv2.String(d.Get("{{snake name}}").(string)),
+                {{/if}}
+        {{else if (eq type "bool")}}
+                {{pascal name}}: platformclientv2.Bool(d.Get("{{snake name}}").(bool)),
+        {{else if (eq type "number")}}
+                // TODO: Handle number property
+        {{else if (eq type "integer")}}
+                {{pascal name}}: platformclientv2.Int(d.Get("{{snake name}}").(int)),
+        {{else if isStringArray}}
+                // TODO: Handle string array property
+        {{else}}
+                {{pascal name}}: {{buildFunction}}(d.Get("{{snake name}}").([]interface{})),
+        {{/if}}{{~/with~}}{{/each}}
+	}
+}

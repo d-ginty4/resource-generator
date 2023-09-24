@@ -1,19 +1,40 @@
-// build{{objectPascal}}s maps an []interface{} into a Genesys Cloud *[]platformclientv2.{{objectGoSDK}}
-func build{{objectPascal}}s({{objectCamel}}s []interface{}) *[]platformclientv2.{{objectGoSDK}} {
-	{{objectCamel}}sSlice := make([]platformclientv2.{{objectGoSDK}}, 0)
-	for _, {{objectCamel}} := range {{objectCamel}}s {
-		var sdk{{objectPascal}} platformclientv2.{{objectGoSDK}}
-		{{objectCamel}}sMap, ok := {{objectCamel}}.(map[string]interface{})
+{{#if (eq type object)}}
+// build{{pascal object}} maps an []interface{} into a Genesys Cloud *platformclientv2.{{sdk object}}
+func build{{pascal object}}({{object}} []interface{}) *platformclientv2.{{sdk object}} {
+	if {{object}} == nil || len({{object}}) == 0 {
+		return nil
+	}
+
+	var sdk{{pascal object}} platformclientv2.{{sdk object}}
+	{{object}}sMap, ok := {{object}}[0].(map[string]interface{})
+	if !ok {
+		continue
+	}
+
+	{{#each buildProperties~}}
+	{{{this}}}
+	{{/each}}
+	
+	return &sdk{{object}}
+}
+{{else}}
+// build{{pascal object}}s maps an []interface{} into a Genesys Cloud *[]platformclientv2.{{sdk object}}
+func build{{pascal object}}s({{object}}s []interface{}) *[]platformclientv2.{{sdk object}} {
+	{{object}}sSlice := make([]platformclientv2.{{sdk object}}, 0)
+	for _, {{object}} := range {{object}}s {
+		var sdk{{pascal object}} platformclientv2.{{sdk object}}
+		{{object}}sMap, ok := {{object}}.(map[string]interface{})
 		if !ok {
 			continue
 		}
 
-		{{#each buildProperties as |buildProperty|}}
-		{{{buildProperty}}}
+		{{#each buildProperties~}}
+		{{{this}}}
 		{{/each}}
 
-		{{objectCamel}}sSlice = append({{objectCamel}}sSlice, sdk{{objectPascal}})
+		{{object}}sSlice = append({{object}}sSlice, sdk{{pascal object}})
 	}
 
-	return &{{objectCamel}}sSlice
+	return &{{object}}sSlice
 }
+{{/if}}

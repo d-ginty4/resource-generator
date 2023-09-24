@@ -1,36 +1,34 @@
-import templates from "../utils/templates";
 import { Generator } from "./Generator";
+import { TemplateGenerator } from "./TemplateGenerator";
 
-export class DataSourceGenerator extends Generator {
-  template: string;
-  outputLocation: string;
+class DataSourceGenerator extends Generator {
+  templateGenerator: TemplateGenerator;
 
   constructor() {
     super();
-    this.template = templates.get("dataSource")!;
-    this.outputLocation = this.getOutputLocation("dataSource");
+    this.templateGenerator = new TemplateGenerator();
   }
 
   public generate() {
+    console.info(`Creating data source file for ${Generator.config.package}`);
     if (Generator.skeltonStructure || Generator.config.skeletonDataSourceFile) {
-      console.info(
-        `Creating data source file structure for ${Generator.globalData.englishName}`
+      this.templateGenerator.generate(
+        "dataSource",
+        {
+          ...Generator.parentObject,
+          skeletonStructure: true,
+        },
+        true
       );
-      this.generateFile(this.template, this.outputLocation, {
-        skeletonStructure: true,
-      });
-      console.info(
-        `Created data source file structure for ${Generator.globalData.englishName}`
+    } else {
+      this.templateGenerator.generate(
+        "dataSource",
+        Generator.parentObject,
+        true
       );
-      return;
     }
-
-    console.info(
-      `Creating data source file for ${Generator.globalData.englishName}`
-    );
-    this.generateFile(this.template, this.outputLocation);
-    console.info(
-      `Created data source file for ${Generator.globalData.englishName}`
-    );
+    console.info(`Created data source file for ${Generator.config.package}`);
   }
 }
+
+export default new DataSourceGenerator();

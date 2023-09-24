@@ -1,8 +1,16 @@
-"{{name}}": {
+{{#if isReference}}
+"{{name}}_id": { 
     Description: "{{{description}}}",{{#if required}}
-    Required:    true,{{else}}
-    Optional:    true,{{/if}}
-    Type:        {{type}},{{#if singleItem}}
-    MaxItems:    1{{/if}}{{#if element}}
-    Elem:        {{element}}{{/if}}
+    Required: true,{{else}}
+    Optional: true,{{/if}}
 },
+{{else}}
+"{{name}}": { 
+    Description: "{{{description}}}",{{#if required}}
+    Required: true,{{else}}
+    Optional: true,{{/if}}{{#with tfSchemaData}}
+    Type:   {{type}},{{#if maxItems}}
+    MaxItems: {{maxItems}},{{/if}}{{#if element}}
+    Elem: {{element}},{{/if}}{{/with}}
+},
+{{/if}}
