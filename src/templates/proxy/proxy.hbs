@@ -157,7 +157,15 @@ func get{{pascal packageName}}Proxy(clientConfig *platformclientv2.Configuration
 		{{#unless skeletonStructure}}
 		var all{{pascal name}}s []platformclientv2.{{sdk name}}
 
-		for pageNum := 1; ; pageNum++ {
+		{{name}}s, _, err := p.{{apiCamel}}.{{getAllMethod}}()
+		if err != nil {
+			return nil, fmt.Errorf("Failed to get {{english name}}: %v", err)	
+		}
+		for _, {{name}} := range *{{name}}s.Entities {
+			all{{pascal name}}s = append(all{{pascal name}}s, {{name}})
+		}
+
+		for pageNum := 2; pageNum <= *{{name}}s.PageCount ; pageNum++ {
 			const pageSize = 100
 
 			{{name}}s, _, err := p.{{apiCamel}}.{{getAllMethod}}()
@@ -170,7 +178,6 @@ func get{{pascal packageName}}Proxy(clientConfig *platformclientv2.Configuration
 			}
 
 			for _, {{name}} := range *{{name}}s.Entities {
-				log.Printf("Dealing with {{name}} id : %s", *{{name}}.Id)
 				all{{pascal name}}s = append(all{{pascal name}}s, {{name}})
 			}
 		}
@@ -195,13 +202,16 @@ func get{{pascal packageName}}Proxy(clientConfig *platformclientv2.Configuration
 			return "", true, fmt.Errorf("No {{english packageName}} found with name %s", name)
 		}
 
-		if len(*{{name}}s.Entities) > 1 {
-			return "", false, fmt.Errorf("Too many values returned in look for {{english packageName}}s.  Unable to choose 1 {{english packageName}}.  Please refine search and continue.")
+		var {{name}} platformclientv2.{{sdk name}}
+		for _, {{name}}Sdk := range *{{name}}s.Entities {
+			if *{{name}}.Name == name {
+				log.Printf("Retrieved the {{english packageName}} id %s by name %s", *{{name}}Sdk.Id, name)
+				{{name}} = {{name}}Sdk
+				return *{{name}}.Id, false, nil
+			}
 		}
 
-		log.Printf("Retrieved the {{name}} id %s by name %s", *(*{{name}}s.Entities)[0].Id, name)
-		{{name}} := (*{{name}}s.Entities)[0]
-		return *{{name}}.Id, false, nil
+		return "", false, fmt.Errorf("Unable to find {{english packageName}} with name %s", name)
 		{{else}}
 		return "", false, nil
 		{{/unless}}

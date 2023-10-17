@@ -96,7 +96,6 @@ export abstract class Generator {
           continue;
         }
 
-        
         const prop = new PropertyData();
         prop.setName(propertyName);
         property.type ? prop.setType(property.type) : prop.setType("object");

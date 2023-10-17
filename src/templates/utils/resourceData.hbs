@@ -4,20 +4,22 @@ func get{{pascal packageName}}FromResourceData(d *schema.ResourceData) platformc
         {{#each properties as |property|}}{{~#with property~}}
         {{#if (eq name "division_id")}}
                 Division: &platformclientv2.Writabledivision{Id: platformclientv2.String(d.Get("division_id").(string))},
+        {{else if (eq type "unknown")}}
+                // TODO: Handle {{snake name}} property
         {{else if (eq type "string")}}
                 {{#if isReference}}
                 {{pascal name}}: gcloud.BuildSdkDomainEntityRef(d, "{{snake name}}_id"),
                 {{else}}
                 {{pascal name}}: platformclientv2.String(d.Get("{{snake name}}").(string)),
                 {{/if}}
-        {{else if (eq type "bool")}}
+        {{else if (eq type "boolean")}}
                 {{pascal name}}: platformclientv2.Bool(d.Get("{{snake name}}").(bool)),
         {{else if (eq type "number")}}
-                // TODO: Handle number property
+                {{pascal name}}: platformclientv2.Float64(d.Get("{{snake name}}").(float64)),
         {{else if (eq type "integer")}}
                 {{pascal name}}: platformclientv2.Int(d.Get("{{snake name}}").(int)),
         {{else if isStringArray}}
-                // TODO: Handle string array property
+                // TODO: Handle {{snake name}} property
         {{else}}
                 {{pascal name}}: {{buildFunction}}(d.Get("{{snake name}}").([]interface{})),
         {{/if}}{{~/with~}}{{/each}}

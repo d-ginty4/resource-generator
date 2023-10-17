@@ -1,11 +1,11 @@
 {{#if isReference}}
-"{{name}}_id": { 
+"{{snake name}}_id": { 
     Description: "{{{description}}}",{{#if required}}
     Required: true,{{else}}
     Optional: true,{{/if}}
 },
 {{else}}
-"{{name}}": { 
+"{{snake name}}": { 
     Description: "{{{description}}}",{{#if required}}
     Required: true,{{else}}
     Optional: true,{{/if}}{{#with tfSchemaData}}

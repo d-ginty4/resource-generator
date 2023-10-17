@@ -105,6 +105,8 @@ func read{{pascal packageName}}(ctx context.Context, d *schema.ResourceData, met
 		if {{../name}}.Division != nil && {{../name}}.Division.Id != nil {
 			d.Set("division_id", *{{../name}}.Division.Id)
 		}
+		{{else if (eq type "unknown")~}}
+            // TODO: Handle {{snake name}} property
 		{{else~}}
 		resourcedata.SetNillableValue(d, "{{snake name}}", {{../name}}.{{pascal name}})
 		{{/if~}}{{/each}}
@@ -126,6 +128,7 @@ func update{{pascal packageName}}(ctx context.Context, d *schema.ResourceData, m
 	{{else}}
 	sdkConfig := meta.(*gcloud.ProviderMeta).ClientConfig
 	proxy := new{{pascal packageName}}Proxy(sdkConfig)
+	
 	{{packageName}} := get{{pascal packageName}}FromResourceData(d)
 
 	log.Printf("Updating {{english packageName}} %s", *{{packageName}}.Name)

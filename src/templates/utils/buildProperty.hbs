@@ -1,17 +1,19 @@
 {{~#if (eq type "string")~}}
-    {{#if isReference}}
+    {{~#if isReference~}}
     {{object}}.{{pascal name}} = &platformclientv2.Domainentityref{Id: platformclientv2.String({{object}}sMap["{{snake name}}_id"].(string))}
-    {{else}}
+    {{~else~}}
     resourcedata.BuildSDKStringValueIfNotNil(&sdk{{pascal object}}.{{pascal name}}, {{object}}sMap, "{{snake name}}")
-    {{/if}}
-{{~else if (eq type "bool")~}}
+    {{~/if~}}
+{{~else if (eq type "boolean")~}}
 {{object}}.{{pascal name}} = platformclientv2.Bool(sdk{{pascal object}}sMap["{{snake name}}"].(bool))
 {{~else if (eq type "integer")~}}
 sdk{{pascal object}}.{{pascal name}} = platformclientv2.Int({{object}}sMap["{{snake name}}"].(int))
 {{~else if (eq type "number")~}}
-// TODO: Handle number property
+// TODO: Handle {{snake name}} property
 {{~else if isStringArray~}}
 resourcedata.BuildSDKStringArrayValueIfNotNil(&sdk{{pascal object}}.{{pascal name}}, {{object}}sMap, "{{snake name}}")
+{{~else if (eq type "unknown")~}}
+// TODO: Handle {{snake name}} property
 {{~else~}}
 resourcedata.BuildSDKInterfaceArrayValueIfNotNil(&sdk{{pascal object}}.{{pascal name}}, {{object}}sMap, "{{snake name}}", {{buildFunction}})
 {{~/if~}}

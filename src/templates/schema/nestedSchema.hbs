@@ -1,7 +1,7 @@
 {{objectName}}Resource := &schema.Resource{
     Schema: map[string]*schema.Schema{
         {{#each properties}}
-        {{{this}}}
+        {{{this}~}}
         {{/each}}
 	},
 }

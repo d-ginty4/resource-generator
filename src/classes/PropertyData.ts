@@ -70,7 +70,7 @@ export default class PropertyData {
 
   private createTFSchemaData(): void {
     if (!this.type) {
-      throw new Error("Cannot generate TFSchemaProps without original type");
+      this.setType("unknown");
     }
 
     let schemaProperties: TFSchemaData = {};
@@ -101,7 +101,7 @@ export default class PropertyData {
         schemaProperties.element = `${this.nestedObject?.getName()}Resource`;
         break;
       default:
-        throw new Error(`Unknown type ${this.type}`);
+        this.setType("unknown")
     }
     this.tfSchemaData = schemaProperties;
   }

@@ -49,7 +49,7 @@ func Resource{{pascal packageName}}() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			{{#unless skeletonStructure}}
 			{{#each properties}}
-			{{> schemaProperty}}
+			{{> schemaProperty~}}
 			
 			{{/each}}
 			{{/unless}}
