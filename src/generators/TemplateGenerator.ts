@@ -85,7 +85,7 @@ export class TemplateGenerator extends Generator {
       case "resourceTest":
         return `output/${packageName}/resource_genesyscloud_${packageName}_test.go`
       case "apis":
-        return `output/${packageName}/examples/resources/${packageName}/apis.md`
+        return `output/${packageName}/examples/resources/genesyscloud_${packageName}/apis.md`;
       default:
         throw new Error(`Unknown file type ${fileType}`);
     }

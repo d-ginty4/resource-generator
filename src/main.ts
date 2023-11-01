@@ -65,10 +65,10 @@ export default async function main() {
       `output/${config.package}/examples/data-sources`
     );
     createFolderIfNotExists(
-      `output/${config.package}/examples/resources/${config.package}`
+      `output/${config.package}/examples/resources/genesyscloud_${config.package}`
     );
     createFolderIfNotExists(
-      `output/${config.package}/examples/data-sources/${config.package}`
+      `output/${config.package}/examples/data-sources/genesyscloud_${config.package}`
     );
 
     // Generate documentation files
@@ -96,6 +96,8 @@ export default async function main() {
         if (stat.isDirectory()) {
           // Recursively delete subfolder content
           await deleteFolderContent(filePath);
+          // Remove the empty directory
+          await fsPromises.rmdir(filePath);
         } else {
           // Delete file
           await fsPromises.unlink(filePath);
