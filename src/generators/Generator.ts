@@ -41,6 +41,7 @@ export abstract class Generator {
       "dateModified",
       "version",
       "createdBy",
+      "modifiedBy",
       "selfUri",
     ];
     if (Generator.config.ignoreProperties) {
@@ -51,7 +52,6 @@ export abstract class Generator {
     } else {
       this.ignorableProperties = properties;
     }
-
 
     // Generate parent object
     if (!Generator.parentObject) {
@@ -83,9 +83,6 @@ export abstract class Generator {
     object: SwaggerSchema,
     packageName?: string,
   ): Resource {
-    if (!object) {
-
-    }
     const required = object.required || [];
     const properties = object.properties;
     const tempObject = new Resource(name, packageName);
@@ -114,21 +111,39 @@ export abstract class Generator {
           if (property.items?.$ref) {
             const objName = property.items?.$ref.split("/")[2]!;
 
-            if (objName !== name && this.isValidObject(objName) && !this.visitedObjects.includes(objName)) {
+            if (
+              objName !== name &&
+              this.isValidObject(objName) &&
+              !this.visitedObjects.includes(objName)
+            ) {
               this.visitedObjects.push(objName);
               prop.setNestedObject(
-                this.setObject(objName,Generator.swagger.definitions[objName])
+                this.setObject(objName, Generator.swagger.definitions[objName])
               );
+            } else if (this.visitedObjects.includes(objName)) {
+              const nestedObject = new Resource(objName);
+              prop.setNestedObject(nestedObject);
             }
           }
         } else if (prop.getType() === "object") {
           const objName = property.$ref?.split("/")[2]!;
-
+          
           if (objName !== name && this.isValidObject(objName) && !this.visitedObjects.includes(objName)) {
-            this.visitedObjects.push(objName);
+            if (objName === "DomainEntityRef"){
+              prop.setType("string")
+              prop.setName(prop.getName() + "Id")
+              prop.setIsReference(true)
+            } else {
+              this.visitedObjects.push(objName);
+              prop.setNestedObject(
+                this.setObject(objName, Generator.swagger.definitions[objName])
+              );
+            }
+          } else if (this.visitedObjects.includes(objName)) {
+            const nestedObject = new Resource(objName)
             prop.setNestedObject(
-              this.setObject(objName, Generator.swagger.definitions[objName])
-            );
+              nestedObject
+            )
           }
         }
         prop.generateData();

@@ -8,7 +8,7 @@ import (
 	{{/if}}
 	{{/unless}}
 	"context"
-	"github.com/mypurecloud/platform-client-sdk-go/v105/platformclientv2"
+	"github.com/mypurecloud/platform-client-sdk-go/{{version}}/platformclientv2"
 )
 
 /*
@@ -156,17 +156,20 @@ func get{{pascal packageName}}Proxy(clientConfig *platformclientv2.Configuration
 	func getAll{{pascal packageName}}Fn(ctx context.Context, p *{{packageName}}Proxy) (*[]platformclientv2.{{sdk name}}, error) {
 		{{#unless skeletonStructure}}
 		var all{{pascal name}}s []platformclientv2.{{sdk name}}
-
+		const pageSize = 100
+		
 		{{name}}s, _, err := p.{{apiCamel}}.{{getAllMethod}}()
 		if err != nil {
 			return nil, fmt.Errorf("Failed to get {{english name}}: %v", err)	
+		}
+		if {{name}}s.Entities == nil || len(*{{name}}s.Entities) == 0 {
+			return &all{{pascal name}}s, nil
 		}
 		for _, {{name}} := range *{{name}}s.Entities {
 			all{{pascal name}}s = append(all{{pascal name}}s, {{name}})
 		}
 
 		for pageNum := 2; pageNum <= *{{name}}s.PageCount ; pageNum++ {
-			const pageSize = 100
 
 			{{name}}s, _, err := p.{{apiCamel}}.{{getAllMethod}}()
 			if err != nil {
@@ -191,11 +194,9 @@ func get{{pascal packageName}}Proxy(clientConfig *platformclientv2.Configuration
 	// get{{pascal packageName}}IdByNameFn is an implementation of the function to get a Genesys Cloud {{english packageName}} by name
 	func get{{pascal packageName}}IdByNameFn(ctx context.Context, p *{{packageName}}Proxy, name string) (id string, retryable bool, err error) {
 		{{#unless skeletonStructure}}
-		const pageNum = 1
-		const pageSize = 100
-		{{name}}s, _, err := p.{{apiCamel}}.{{getAllMethod}}()
+		{{name}}s, err := getAll{{pascal packageName}}Fn(ctx, p)
 		if err != nil {
-			return "", false, fmt.Errorf("Error searching {{english packageName}} %s: %s", name, err)
+			return "", false, err
 		}
 
 		if {{name}}s.Entities == nil || len(*{{name}}s.Entities) == 0 {
@@ -236,12 +237,6 @@ func get{{pascal packageName}}Proxy(clientConfig *platformclientv2.Configuration
 	// update{{pascal packageName}}Fn is an implementation of the function to update a Genesys Cloud {{english packageName}}
 	func update{{pascal packageName}}Fn(ctx context.Context, p *{{packageName}}Proxy, id string, {{packageName}} *platformclientv2.{{sdk name}}) (*platformclientv2.{{sdk name}}, error) {
 		{{#unless skeletonStructure}}
-		{{name}}, _, err := get{{pascal packageName}}ByIdFn(ctx, p, id)
-		if err != nil {
-			return nil, fmt.Errorf("Failed to get {{english packageName}} by id %s: %s", id, err)
-		}
-
-		{{name}}.Version = {{packageName}}.Version
 		{{name}}, _, err = p.{{apiCamel}}.{{updateMethod}}(id, *{{name}})
 		if err != nil {
 			return nil, fmt.Errorf("Failed to update {{english packageName}}: %s", err)

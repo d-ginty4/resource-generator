@@ -3,7 +3,7 @@ resourcedata.SetMapInterfaceArrayWithFuncIfNotNil({{object}}Map, "{{snake name}}
 {{~else if (eq type "unknown")~}}
 // TODO: Handle {{snake name}} property
 {{~else if isReference~}}
-resourcedata.SetMapReferenceValueIfNotNil({{object}}Map, "{{snake name}}_id", {{object}}.{{pascal name}})
+resourcedata.SetMapReferenceValueIfNotNil({{object}}Map, "{{snake name}}", {{object}}.{{pascal name}})
 {{~else if isStringArray~}}
 resourcedata.SetMapStringArrayValueIfNotNil({{object}}Map, "{{snake name}}", {{object}}.{{pascal name}})
 {{~else~}}

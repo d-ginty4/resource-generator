@@ -1,9 +1,5 @@
-{{#if isReference}}
-"{{snake name}}_id": { 
-    Description: "{{{description}}}",{{#if required}}
-    Required: true,{{else}}
-    Optional: true,{{/if}}
-},
+{{#if (eq type "unknown")}}
+// TODO: Handle {{snake name}} property
 {{else}}
 "{{snake name}}": { 
     Description: "{{{description}}}",{{#if required}}

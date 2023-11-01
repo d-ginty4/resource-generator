@@ -46,18 +46,22 @@ export default class PropertyData {
     this.nestedObject = objectData;
   }
 
+  public setIsReference(isReference: boolean){
+    this.isReference = isReference
+  }
+
   public generateData(): void {
     if (this.name === "division") {
       this.name = "divisionId";
       this.type = "string";
       this.nestedObject = undefined;
-    } else if (this.nestedObject?.getName() === "domainEntityRef") {
-      this.type = "string";
-      this.isReference = true;
-      this.nestedObject = undefined;
-    }
+    } 
     this.createTFSchemaData();
     this.createUtilFunctions();
+  }
+
+  public getName(): string {
+    return this.name
   }
 
   public getType(): string {
@@ -96,14 +100,23 @@ export default class PropertyData {
         }
         break;
       case "object":
-        schemaProperties.type = "schema.TypeList";
-        schemaProperties.maxItems = 1;
-        schemaProperties.element = `${this.nestedObject?.getName()}Resource`;
+        if (!this.nestedObject?.getName()){
+          this.setAsUnknownProperty()
+        } else{
+          schemaProperties.type = "schema.TypeList";
+          schemaProperties.maxItems = 1;
+          schemaProperties.element = `${this.nestedObject?.getName()}Resource`;
+        }
         break;
       default:
         this.setType("unknown")
     }
     this.tfSchemaData = schemaProperties;
+  }
+
+  private setAsUnknownProperty(){
+    this.setType("unknown")
+    this.tfSchemaData = undefined
   }
 
   private createUtilFunctions(): void {

@@ -4,12 +4,11 @@ import handlebars from "../utils/handlerbarsSetup";
 import { Generator } from "./Generator";
 import templates from "../utils/templates";
 
+const goVersion: string = "v115";
+
 export class TemplateGenerator extends Generator {
   constructor() {
     super();
-    handlebars.registerHelper("eq", function (a, b) {
-      return a === b;
-    });
   }
 
   public generate(
@@ -47,8 +46,12 @@ export class TemplateGenerator extends Generator {
     // Compile the template
     const template = handlebars.compile(templateText);
 
+    const newData = {
+      ...data,
+      version: goVersion,
+    };
     // generate the file from the template and data
-    const output = template(data);
+    const output = template(newData);
 
     if (!destination) {
       return output;
@@ -82,7 +85,7 @@ export class TemplateGenerator extends Generator {
       case "resourceTest":
         return `output/${packageName}/resource_genesyscloud_${packageName}_test.go`
       case "apis":
-        return `output/${packageName}/examples/resources/apis.md`
+        return `output/${packageName}/examples/resources/${packageName}/apis.md`
       default:
         throw new Error(`Unknown file type ${fileType}`);
     }

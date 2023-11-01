@@ -1,7 +1,7 @@
 {
   "name": "templating",
   "version": "1.0.0",
-  "description": "",
+  "description": "A Cx as Code resource generator",
   "main": "app.ts",
   "scripts": {
     "start": "ts-node app.ts $npm_config_config $npm_config_resource && gofmt -w output/",

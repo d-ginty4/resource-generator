@@ -55,9 +55,21 @@ export default async function main() {
   testGenerator.generate();
 
   if (config.documentation) {
-    createFolderIfNotExists(`output/${config.package}/examples`);
-    createFolderIfNotExists(`output/${config.package}/examples/resources`);
-    createFolderIfNotExists(`output/${config.package}/examples/data-sources`);
+    createFolderIfNotExists(
+      `output/${config.package}/examples/`
+    );
+    createFolderIfNotExists(
+      `output/${config.package}/examples/resources`
+    );
+    createFolderIfNotExists(
+      `output/${config.package}/examples/data-sources`
+    );
+    createFolderIfNotExists(
+      `output/${config.package}/examples/resources/${config.package}`
+    );
+    createFolderIfNotExists(
+      `output/${config.package}/examples/data-sources/${config.package}`
+    );
 
     // Generate documentation files
     DocGenerator.generate();

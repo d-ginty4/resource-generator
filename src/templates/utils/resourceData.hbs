@@ -8,7 +8,7 @@ func get{{pascal packageName}}FromResourceData(d *schema.ResourceData) platformc
                 // TODO: Handle {{snake name}} property
         {{else if (eq type "string")}}
                 {{#if isReference}}
-                {{pascal name}}: gcloud.BuildSdkDomainEntityRef(d, "{{snake name}}_id"),
+                {{pascal name}}: gcloud.BuildSdkDomainEntityRef(d, "{{snake name}}"),
                 {{else}}
                 {{pascal name}}: platformclientv2.String(d.Get("{{snake name}}").(string)),
                 {{/if}}
