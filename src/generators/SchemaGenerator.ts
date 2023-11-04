@@ -5,9 +5,11 @@ import Resource from "../classes/Resource";
 // This class generates a terraform schema for the main object and all nested objects
 class SchemaGenerator extends Generator {
   templateGenerator: TemplateGenerator;
+  handledNestedSchemas: string[]
   constructor() {
     super();
     this.templateGenerator = new TemplateGenerator();
+    this.handledNestedSchemas = []
   }
 
   // generates the terraform schema file
@@ -58,9 +60,12 @@ class SchemaGenerator extends Generator {
           objectName: property.getNestedObject()!.getName(),
           properties: this.generateProperties(property.getNestedObject()!),
         };
-        tfSchemas.push(
-          this.templateGenerator.generate("nestedSchema", schemaData)!
-        );
+        if (!this.handledNestedSchemas.includes(schemaData.objectName)){
+          tfSchemas.push(
+            this.templateGenerator.generate("nestedSchema", schemaData)!
+          );
+          this.handledNestedSchemas.push(schemaData.objectName)
+        }
       }
     });
     return tfSchemas;

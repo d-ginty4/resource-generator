@@ -31,7 +31,7 @@ func (r *registerTestInstance) registerTestResources() {
 	r.resourceMapMutex.Lock()
 	defer r.resourceMapMutex.Unlock()
 
-	providerResources["genesyscloud_{{snake packageName}}"] = Resource{{pascal packageName}}()
+	providerResources[resourceName] = Resource{{pascal packageName}}()
 	// TODO: Add references
 }
 
@@ -40,7 +40,7 @@ func (r *registerTestInstance) registerTestDataSources() {
 	r.datasourceMapMutex.Lock()
 	defer r.datasourceMapMutex.Unlock()
 
-	providerDataSources["genesyscloud_{{snake packageName}}"] =  DataSource{{pascal packageName}}()
+	providerDataSources[resourceName] =  DataSource{{pascal packageName}}()
 	// TODO: Add references
 }
 

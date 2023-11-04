@@ -27,7 +27,7 @@ import (
 The resource_genesyscloud_{{snake packageName}}.go contains all of the methods that perform the core logic for a resource.
 */
 
-{{#unless createMethod}}
+{{#if getAllMethod}}
 // getAllAuth{{pascal packageName}} retrieves all of the {{english packageName}} via Terraform in the Genesys Cloud and is used for the exporter
 func getAllAuth{{pascal packageName}}s(ctx context.Context, clientConfig *platformclientv2.Configuration) (resourceExporter.ResourceIDMetaMap, diag.Diagnostics) {
 	{{#if skeletonStructure}}
@@ -48,7 +48,7 @@ func getAllAuth{{pascal packageName}}s(ctx context.Context, clientConfig *platfo
 	return resources, nil
 	{{/if}}
 }
-{{/unless}}
+{{/if}}
 
 // create{{pascal packageName}} is used by the {{snake packageName}} resource to create Genesys cloud {{english packageName}}
 func create{{pascal packageName}}(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

@@ -4,10 +4,14 @@ import { TemplateGenerator } from "./TemplateGenerator";
 
 class UtilsGenerator extends Generator {
   templateGenerator: TemplateGenerator;
+  handledFlattenFunctions: string[];
+  handledBuildFunctions: string[];
 
   constructor() {
     super();
     this.templateGenerator = new TemplateGenerator();
+    this.handledFlattenFunctions = [];
+    this.handledBuildFunctions = [];
   }
 
   // generate utils file
@@ -30,16 +34,34 @@ class UtilsGenerator extends Generator {
     let buildFuncs: string[] = [];
     Generator.parentObject.getProperties().forEach((property) => {
       if (property.getNestedObject()) {
-        flattenFuncs = this.generateFlattenFunctions(
-          property.getNestedObject()?.getName()!,
-          property.getNestedObject()!,
-          flattenFuncs
-        );
-        buildFuncs = this.generateBuildFunctions(
-          property.getNestedObject()?.getName()!,
-          property.getNestedObject()!,
-          buildFuncs
-        );
+        if (
+          !this.handledFlattenFunctions.includes(
+            property.getNestedObject()?.getName()!
+          )
+        ) {
+          flattenFuncs = this.generateFlattenFunctions(
+            property.getNestedObject()?.getName()!,
+            property.getNestedObject()!,
+            flattenFuncs
+          );
+          this.handledFlattenFunctions.push(
+            property.getNestedObject()?.getName()!
+          );
+        }
+        if (
+          !this.handledBuildFunctions.includes(
+            property.getNestedObject()?.getName()!
+          )
+        ) {
+          buildFuncs = this.generateBuildFunctions(
+            property.getNestedObject()?.getName()!,
+            property.getNestedObject()!,
+            buildFuncs
+          );
+          this.handledBuildFunctions.push(
+            property.getNestedObject()?.getName()!
+          );
+        }
       }
     });
 
@@ -75,15 +97,19 @@ class UtilsGenerator extends Generator {
       buildProperties.push(
         this.templateGenerator.generate("buildProperty", {
           ...property,
-          object: objName
+          object: objName,
         })!
       );
-      if (property.getNestedObject()) {
+      if (
+        property.getNestedObject() &&
+        !this.handledBuildFunctions.includes(property.getNestedObject()?.getName()!)
+      ) {
         functions = this.generateBuildFunctions(
           property.getNestedObject()?.getName()!,
           property.getNestedObject()!,
           functions
         );
+        this.handledBuildFunctions.push(property.getNestedObject()?.getName()!);
       }
     });
 
@@ -122,12 +148,16 @@ class UtilsGenerator extends Generator {
           object: objName,
         })!
       );
-      if (property.getNestedObject()) {
+      if (
+        property.getNestedObject() &&
+        !this.handledFlattenFunctions.includes(property.getNestedObject()?.getName()!)
+      ) {
         functions = this.generateFlattenFunctions(
           property.getNestedObject()?.getName()!,
           property.getNestedObject()!,
           functions
         );
+        this.handledFlattenFunctions.push(property.getNestedObject()?.getName()!);
       }
     });
 
