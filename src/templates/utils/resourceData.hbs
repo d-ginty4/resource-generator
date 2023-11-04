@@ -2,7 +2,7 @@
 func get{{pascal packageName}}FromResourceData(d *schema.ResourceData) platformclientv2.{{sdk name}} {
 	return platformclientv2.{{sdk name}}{
         {{#each properties as |property|}}{{~#with property~}}
-        {{#if (eq name "division_id")}}
+        {{#if (eq name "divisionId")}}
                 Division: &platformclientv2.Writabledivision{Id: platformclientv2.String(d.Get("division_id").(string))},
         {{else if (eq type "unknown")}}
                 // TODO: Handle {{snake name}} property

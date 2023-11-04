@@ -170,7 +170,6 @@ func get{{pascal packageName}}Proxy(clientConfig *platformclientv2.Configuration
 		}
 
 		for pageNum := 2; pageNum <= *{{name}}s.PageCount ; pageNum++ {
-
 			{{name}}s, _, err := p.{{apiCamel}}.{{getAllMethod}}()
 			if err != nil {
 				return nil, fmt.Errorf("Failed to get {{english name}}: %v", err)
@@ -194,7 +193,7 @@ func get{{pascal packageName}}Proxy(clientConfig *platformclientv2.Configuration
 	// get{{pascal packageName}}IdByNameFn is an implementation of the function to get a Genesys Cloud {{english packageName}} by name
 	func get{{pascal packageName}}IdByNameFn(ctx context.Context, p *{{packageName}}Proxy, name string) (id string, retryable bool, err error) {
 		{{#unless skeletonStructure}}
-		{{name}}s, err := getAll{{pascal packageName}}Fn(ctx, p)
+		{{name}}s, _,err := p.{{apiCamel}}.{{getAllMethod}}()
 		if err != nil {
 			return "", false, err
 		}
@@ -237,7 +236,7 @@ func get{{pascal packageName}}Proxy(clientConfig *platformclientv2.Configuration
 	// update{{pascal packageName}}Fn is an implementation of the function to update a Genesys Cloud {{english packageName}}
 	func update{{pascal packageName}}Fn(ctx context.Context, p *{{packageName}}Proxy, id string, {{packageName}} *platformclientv2.{{sdk name}}) (*platformclientv2.{{sdk name}}, error) {
 		{{#unless skeletonStructure}}
-		{{name}}, _, err = p.{{apiCamel}}.{{updateMethod}}(id, *{{name}})
+		{{name}}, _, err := p.{{apiCamel}}.{{updateMethod}}(id, *{{name}})
 		if err != nil {
 			return nil, fmt.Errorf("Failed to update {{english packageName}}: %s", err)
 		}

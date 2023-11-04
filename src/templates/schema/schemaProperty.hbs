@@ -1,12 +1,12 @@
 {{#if (eq type "unknown")}}
 // TODO: Handle {{snake name}} property
 {{else}}
-"{{snake name}}": { 
-    Description: "{{{description}}}",{{#if required}}
+`{{snake name}}`: { 
+    Description: `{{{description}}}`,{{#if required}}
     Required: true,{{else}}
     Optional: true,{{/if}}{{#with tfSchemaData}}
     Type:   {{type}},{{#if maxItems}}
     MaxItems: {{maxItems}},{{/if}}{{#if element}}
-    Elem: {{element}},{{/if}}{{/with}}
+    Elem: {{{element}}},{{/if}}{{/with}}
 },
 {{/if}}

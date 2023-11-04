@@ -16,7 +16,7 @@ To generate a resource simply fill in all the information for the resource you a
 npm start --config=example.yml --resource
 ```
 
-This command will generate a JSON representation of the resource which can help you find potential problems or unwanted properties in the resource. The JSON object will be written to a file named `data.json`. Once your config file is written, and you are happy with the resource object, run the following command:
+This command will generate a JSON representation of the resource which can help you find potential problems or unwanted properties in the resource. The JSON object will be written to a file named `resource.json`. Once your config file is written, and you are happy with the resource object, run the following command:
 
 ```bash
 npm start --config=example.yml
@@ -24,7 +24,7 @@ npm start --config=example.yml
 
 If the config flag is not used, the generator will look for a file named `config.yml`. For the best results, we recommend having _Go_ installed locally to allow the output files to be formatted correctly. Go can be installed from [here](https://go.dev/dl/).
 Every time the start command is run, without the `--resource` flag, the output folder for the resource is overwritten.
-Similarly every time the start command is run with `--resource`, the data.json is overwritten
+Similarly every time the start command is run with `--resource`, the resource.json is overwritten
 
 The resource generator can generate the following:
 

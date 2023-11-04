@@ -27,6 +27,7 @@ import (
 The resource_genesyscloud_{{snake packageName}}.go contains all of the methods that perform the core logic for a resource.
 */
 
+{{#unless createMethod}}
 // getAllAuth{{pascal packageName}} retrieves all of the {{english packageName}} via Terraform in the Genesys Cloud and is used for the exporter
 func getAllAuth{{pascal packageName}}s(ctx context.Context, clientConfig *platformclientv2.Configuration) (resourceExporter.ResourceIDMetaMap, diag.Diagnostics) {
 	{{#if skeletonStructure}}
@@ -47,6 +48,7 @@ func getAllAuth{{pascal packageName}}s(ctx context.Context, clientConfig *platfo
 	return resources, nil
 	{{/if}}
 }
+{{/unless}}
 
 // create{{pascal packageName}} is used by the {{snake packageName}} resource to create Genesys cloud {{english packageName}}
 func create{{pascal packageName}}(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -100,10 +102,8 @@ func read{{pascal packageName}}(ctx context.Context, d *schema.ResourceData, met
 
 		{{#each properties~}}{{#if flattenFunction~}}
 		resourcedata.SetNillableValueWithInterfaceArrayWithFunc(d, "{{snake name}}", {{../name}}.{{pascal name}}, {{flattenFunction}})
-		{{else if (eq name "division_id")~}}
-		if {{../name}}.Division != nil && {{../name}}.Division.Id != nil {
-			d.Set("division_id", *{{../name}}.Division.Id)
-		}
+		{{else if (eq name "divisionId")~}}
+		resourcedata.SetNillableReferenceWritableDivision(d, "division_id", {{../name}}.Division)
 		{{else if (eq type "unknown")~}}
             // TODO: Handle {{snake name}} property
 		{{else if isReference}}

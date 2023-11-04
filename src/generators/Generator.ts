@@ -15,7 +15,7 @@ export abstract class Generator {
   protected static swagger: Swagger;
   protected static skeltonStructure: boolean;
   protected static parentObject: Resource; // An object representation of the resource
-  
+
   // private properties
   private ignorableProperties: string[] = [];
   private visitedObjects: string[] = [];
@@ -72,7 +72,7 @@ export abstract class Generator {
 
     if (process.env.npm_config_resource === "true") {
       const data = JSON.stringify(Generator.parentObject, null, 2);
-      fs.writeFileSync("data.json", data);
+      fs.writeFileSync("resource.json", data);
       console.log("Resource object written to data.json");
       process.exit();
     }
@@ -81,7 +81,7 @@ export abstract class Generator {
   private setObject(
     name: string,
     object: SwaggerSchema,
-    packageName?: string,
+    packageName?: string
   ): Resource {
     const required = object.required || [];
     const properties = object.properties;
@@ -106,9 +106,7 @@ export abstract class Generator {
         if (prop.getType() === "array") {
           if (property.items?.type === "string") {
             prop.setIsStringArray(true);
-            continue;
-          }
-          if (property.items?.$ref) {
+          } else if (property.items?.$ref) {
             const objName = property.items?.$ref.split("/")[2]!;
 
             if (
@@ -127,12 +125,16 @@ export abstract class Generator {
           }
         } else if (prop.getType() === "object") {
           const objName = property.$ref?.split("/")[2]!;
-          
-          if (objName !== name && this.isValidObject(objName) && !this.visitedObjects.includes(objName)) {
-            if (objName === "DomainEntityRef"){
-              prop.setType("string")
-              prop.setName(prop.getName() + "Id")
-              prop.setIsReference(true)
+
+          if (
+            objName !== name &&
+            this.isValidObject(objName) &&
+            !this.visitedObjects.includes(objName)
+          ) {
+            if (objName === "DomainEntityRef") {
+              prop.setType("string");
+              prop.setName(prop.getName() + "Id");
+              prop.setIsReference(true);
             } else {
               this.visitedObjects.push(objName);
               prop.setNestedObject(
@@ -140,10 +142,8 @@ export abstract class Generator {
               );
             }
           } else if (this.visitedObjects.includes(objName)) {
-            const nestedObject = new Resource(objName)
-            prop.setNestedObject(
-              nestedObject
-            )
+            const nestedObject = new Resource(objName);
+            prop.setNestedObject(nestedObject);
           }
         }
         prop.generateData();
@@ -165,6 +165,6 @@ export abstract class Generator {
       return false;
     }
 
-    return true
+    return true;
   }
 }
