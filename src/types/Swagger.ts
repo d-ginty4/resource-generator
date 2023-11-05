@@ -11,6 +11,7 @@ export interface Swagger {
   definitions: Definitions;
   responses: Responses;
   externalDocs: ExternalDocs;
+  dateDownloaded: string
 }
 
 export interface Info {
@@ -56,6 +57,7 @@ export interface SwaggerOperation {
     permissions: string[]
   }
   'x-purecloud-method-name': string
+  'x-genesys-preview': boolean
 }
 
 export interface SwaggerParameter {

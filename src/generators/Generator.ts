@@ -114,10 +114,18 @@ export abstract class Generator {
               this.isValidObject(objName) &&
               !this.visitedObjects.includes(objName)
             ) {
-              this.visitedObjects.push(objName);
-              prop.setNestedObject(
-                this.setObject(objName, Generator.swagger.definitions[objName])
-              );
+              // Don't handle arrays of references
+              if (objName === "DomainEntityRef") {
+                prop.setType("unknown");
+              } else {
+                this.visitedObjects.push(objName);
+                prop.setNestedObject(
+                  this.setObject(
+                    objName,
+                    Generator.swagger.definitions[objName]
+                  )
+                );
+              }
             } else if (this.visitedObjects.includes(objName)) {
               const nestedObject = new Resource(objName);
               prop.setNestedObject(nestedObject);
