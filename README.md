@@ -168,10 +168,12 @@ If generating documentation, the resource generator will generate the following 
 
 - examples
   - resources
-    - resource.tf
-    - apis.md
+    - genesyscloud_{{packageName}}
+      - resource.tf
+      - apis.md
   - data-sources
-    - data-source.tf
+    - genesyscloud_{{packageName}}
+      - data-source.tf
 
 Please note that `resource.tf` and `data-source.tf` will be **blank files** and will require you to fill in the content. `api.md` will only be created if links have been added to the operations
 
